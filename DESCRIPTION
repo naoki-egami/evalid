@@ -1,0 +1,11 @@
+Package: evalid
+Type: Package
+Title: Methodologies for Improving External Validity of Randomized Experiments
+Version: 0.1.0
+Author: Naoki Egami and Erin Hartman 
+Maintainer: Naoki Egami <naoki.egami@columbia.edu>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
