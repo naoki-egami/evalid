@@ -1,5 +1,8 @@
 wls_projection <- function(formula_outcome, treatment,
-                           exp_data, pop_data, weights, ...) {
+                           exp_data, pop_data, weights,
+                           pop_weights = NULL, ...) {
+  
+  if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
   ## Model Y1 with weights
   lm_mod_1 <- lm_robust(formula_outcome, weights = weights[exp_data[, treatment_var] == 1],
@@ -17,7 +20,7 @@ wls_projection <- function(formula_outcome, treatment,
   ## Project Y0
   lm_proj_0 <- predict(lm_mod_0, newdata = pop_data)
 
-  pate_proj <- mean(lm_proj_1  - lm_proj_0)
+  pate_proj <- weighted.mean(lm_proj_1  - lm_proj_0, w = pop_weights)
 
   return(pate_proj)
 }

@@ -1,19 +1,25 @@
 aipw_bart <- function(formula_outcome, treatment,
                       formula_weights,
                       model, weights_type = "calibration",
-                      exp_data, pop_data, bart_pates, ...) {
+                      exp_data, pop_data, bart_pates, 
+                      pop_weights = NULL, ...) {
 
   outcome_var <- all.vars(formula_outcome)[attr(terms(formula_outcome), "response")]
   covariates <- labels(terms(formula_outcome))
+  
+  ## assumes that bart_pates projection already incorporates pop_weights
+  if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
   if(weights_type == "ipw"){
     weights <- weights_ipw(formula_weights = formula_weights,
                            exp_data = exp_data,
-                           pop_data = pop_data, weight_max = weight_max, ...)
+                           pop_data = pop_data, weight_max = weight_max, 
+                           pop_weights = pop_weights, ...)
   }else if(weights_type == "calibration"){
     weights <- weights_cal(formula_weights = formula_weights,
                            exp_data = exp_data,
-                           pop_data = pop_data, weight_max = weight_max, ...)
+                           pop_data = pop_data, weight_max = weight_max, 
+                           pop_weights = pop_weights, ...)
   }
 
   ## Predict on to sample

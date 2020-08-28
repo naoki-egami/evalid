@@ -1,10 +1,14 @@
 proj_bart <- function(formula_outcome, treatment,
-                     exp_data, pop_data, alpha = 0.05, return_models = FALSE, ...) {
+                     exp_data, pop_data, alpha = 0.05, 
+                     pop_weights = NULL,
+                     return_models = FALSE, ...) {
 
   ## Determine outcome variable name and covariates
   ## (note, might instead track outcome var name)
   outcome_var <- all.vars(formula_outcome)[attr(terms(formula_outcome), "response")]
   covariates <- labels(terms(formula_outcome))
+  
+  if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
   ## Fit bart model
   bart_fit <- bartc(response = exp_data[, outcome_var],
@@ -20,12 +24,12 @@ proj_bart <- function(formula_outcome, treatment,
   ## project Y1
   bart_proj_1 <- rowSums(predict(bart_fit,
                                  newdata = pop_data[, covariates],
-                                 type = "y.1")) / nrow(pop_data)
+                                 type = "y.1")) %*% pop_weights / sum(pop_weights)
 
   ## project Y0
   bart_proj_0 <- rowSums(predict(bart_fit,
                                  newdata = pop_data[, covariates],
-                                 type = "y.0")) / nrow(pop_data)
+                                 type = "y.0")) %*% pop_weights / sum(pop_weights)
 
   ## distribution of PATE estimates
   bart_pates <- bart_proj_1 - bart_proj_0

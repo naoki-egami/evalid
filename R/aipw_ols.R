@@ -3,22 +3,28 @@ aipw_ols <- function(formula_outcome, treatment,
                      formula_weights,
                      model, weights_type = "calibration",
                      exp_data,
-                     pop_data, weight_max, ...){
+                     pop_data, weight_max, 
+                     pop_weights = NULL, ...){
+  
+  if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
   if(weights_type == "ipw"){
     weights <- weights_ipw(formula_weights = formula_weights,
                            exp_data = exp_data,
-                           pop_data = pop_data, weight_max = weight_max, ...)
+                           pop_data = pop_data, weight_max = weight_max, 
+                           pop_weights = pop_weights, ...)
   }else if(weights_type == "calibration"){
     weights <- weights_cal(formula_weights = formula_weights,
                            exp_data = exp_data,
-                           pop_data = pop_data, weight_max = weight_max, ...)
+                           pop_data = pop_data, weight_max = weight_max, 
+                           pop_weights = pop_weights, ...)
   }
 
   ## do ols projection, get models back
   proj <- proj_ols(formula_outcome = formula_outcome,
                    exp_data = exp_data, pop_data = pop_data,
-                   treatment = treatment, return_models = TRUE, ...)
+                   treatment = treatment, return_models = TRUE, 
+                   pop_weights = pop_weights, ...)
 
   ## get residuals
   exp_data$resid <- exp_data$Y -

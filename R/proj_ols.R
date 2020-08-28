@@ -1,6 +1,10 @@
 ## OLS Projection
 proj_ols <- function(formula_outcome, exp_data, pop_data,
-                     treatment = "treatment", return_models = FALSE, ...) {
+                     treatment = "treatment", 
+                     pop_weights = NULL, 
+                     return_models = FALSE, ...) {
+  
+  if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
   ## Run models separately on Y1 and Y0
   lm_mod_1 <- lm(formula_outcome,
@@ -13,7 +17,7 @@ proj_ols <- function(formula_outcome, exp_data, pop_data,
   lm_proj_0 <- predict(lm_mod_0, newdata = data.frame(pop_data))
 
   ## Mean difference in projected Y1 and Y0
-  pate_proj <- mean(lm_proj_1  - lm_proj_0)
+  pate_proj <- weighted.mean(lm_proj_1  - lm_proj_0, w = pop_weights)
 
   ## Return models for aipw if requested
   if(!return_models) {
