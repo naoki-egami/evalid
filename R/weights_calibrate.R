@@ -12,7 +12,7 @@ create_targets <- function (target_design, target_formula) {
 weights_cal <- function(formula_weights, exp_data, pop_data,
                         calfun = "raking", weight_max = Inf,
                         pop_weights = NULL) {
-  
+
   if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
   ## gather the covariate terms
@@ -22,8 +22,8 @@ weights_cal <- function(formula_weights, exp_data, pop_data,
   formula = as.formula(paste0("~ ", paste(covariates, collapse = " + ")))
 
   ## Make survey designs for calibration
-  sample_surv <- svydesign(ids = ~1, data = exp_data)
-  pop_surv <- svydesign(ids = ~1, data = pop_data, weights = pop_weights)
+  suppressWarnings(sample_surv <- svydesign(ids = ~ 1, data = exp_data))
+  pop_surv <- svydesign(ids = ~ 1, data = pop_data, weights = pop_weights)
 
   ### Population targets (normalized to counts in sample size)
   targets <- create_targets(pop_surv, formula) * nrow(sample_surv)

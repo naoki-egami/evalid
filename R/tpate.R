@@ -9,6 +9,10 @@
 #' @import bartCause
 #' @import survey
 #' @import tidyverse
+#' @importFrom pbmcapply pbmclapply
+#' @importFrom pbapply pblapply
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach "%dopar%" "%do%" foreach
 #' @return \code{model_pAMCE} returns an object of \code{pAMCE} class.
 #'  \itemize{
 #'    \item \code{AMCE}: Estimates of the pAMCE for all factors.
@@ -31,91 +35,112 @@ tpate <- function(formula_outcome,
                   type = "weighting",
                   outcome_type = "ols",
                   weights_type = "calibration",
-                  pop_weights = NULL
+                  pop_weights = NULL,
+                  boot = FALSE, numCores = NULL, seed = 1234,
                   ...) {
 
   ## Error handling that needs to be done:
   ## - are covariates present in both population and exp data (unless using wLS)
+
+  # Check 1: Don't allow variable called, "weights"
+  # Check 2: Require researchers to transform variables beforehand
 
   ## Note:
   ## Need to take in outcome_var for weighted methods, right now assumes "Y"
   ## Need to take in alpha level, right now assumes 0.05 (for the bart posteriors)
 
   ## Naoki: I will work on Error Handling Later.
-  
+
+  # ###################
+  # Setup
+  # ###################
+  if(is.null(numCores) == FALSE){
+    if(numCores >= detectCores()) numCores <- detectCores() - 1
+  }
+  if(is.null(numCores)) numCores <- detectCores() - 1
+
+
   ## If pop_weights are null, assign as all 1
   if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
-  ## ipw-logit
-  if(estimator_type == "sate") {
-    res <- wls(exp_data,
-               ## Run formula on outcome + treatment, no weights
-               formula_outcome = update(formula(Y ~ 1), paste("~ . +", treatment)),
-               treatment = treatment, weights = NULL,
-               pop_weights = pop_weights, ...)$est
+  # Keep names of outcome variable
+  outcome <- all.vars(formula_outcome)[1]
+
+  # prepare for Bootstrap
+  # For now, I assume that we only do the complete randomization.
+  if(boot == TRUE){
+    boot_ind <- exp_data[, treatment]
   }
 
-  ## ipw-logit
-  if(estimator_type == "ipw-logit") {
-    ## get logit weights
-    weights <- ipw_weights(exp_data, pop_data, formula_weights)
+  ## Estimate SATE with difference in means (Always)
+  formula_sate <- as.formula(paste0(outcome, "~", paste0(treatment, collapse = " + ")))
+  ## Run formula on outcome + treatment, no weights
+  sate_fit <- wls(formula_outcome = formula_sate,
+                  treatment = treatment,
+                  exp_data = exp_data,
+                  weights = NULL, pop_weights = pop_weights,
+                  boot = boot, boot_ind = boot_ind,
+                  numCores = numCores, seed = seed)
 
-    res <- wls(exp_data,
-               ## Run formula on outcome + treatment, with weights
-               formula_outcome = update(formula(Y ~ 1), paste("~ . +", treatment)),
-               treatment = treatment, weights = weights,
-               pop_weights = pop_weights, ...)$est
+  # 1. Weighting-based Estimators
+  if(est_type == "ipw" | est_type == "wls"){
+    if(weights_type == "logit") {
+      ## get logit weights
+      ipw_weights <- weights_logit(formula_weights = formula_weights,
+                                   exp_data = exp_data, pop_data = pop_data,
+                                   weight_max = Inf, pop_weights = pop_weights)
+    }else if(weights_type == "calibration"){
+      ## get calibration weights
+      ipw_weights <- weights_cal(formula_weights = formula_weights,
+                                 exp_data = exp_data, pop_data = pop_data,
+                                 calfun = "raking", weight_max = Inf,
+                                 pop_weights = pop_weights)
+    }
+
+    if(est_type == "ipw"){
+      # 1.1 IPW (est_type = "ipw")
+      formula_weighting <- as.formula(paste0(outcome, "~", paste0(treatment, collapse = " + ")))
+    }else if(est_type == "wls"){
+      # 1.2 wls (est_type = "wls")
+      # We are not currently accepting interactions between X and treatments
+      formula_weighting <- update(formula_outcome, paste("~ . +", treatment))
+    }
+    tpate_fit <- wls(formula_outcome = formula_weighting,
+                     treatment = treatment,
+                     exp_data = exp_data,
+                     weights = ipw_weights, pop_weights = pop_weights,
+                     boot = boot, boot_ind = boot_ind,
+                     numCores = numCores, seed = seed)
   }
 
-  ## ipw-cal
-  if(estimator_type == "ipw-cal") {
-    ## get calibration weights
-    weights <- cal_weights(exp_data, pop_data, formula_weights)
-    res <- wls(exp_data,
-               ## Run formula on outcome + treatment, with weights
-               formula_outcome = update(formula(Y ~ 1), paste("~ . +", treatment)),
-               treatment = treatment, weights = weights,
-               pop_weights = pop_weights, ...)$est
+  # 2. Outcome-based Estimators
+  if(est_type == "outcome-ols" | est_type == "outome-bart"){
+    formula_proj <- update(formula_outcome, paste("~ . -", treatment))
+    if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
+
+
+    if(est_type == "outcome-ols") {
+      # 2.1: OLS (outcome-ols)
+      tpate_fit <- proj_ols(formula_outcome = formula_proj,
+                            treatment = treatment,
+                            exp_data = exp_data,
+                            pop_data = pop_data,
+                            pop_weights = pop_weights,
+                            boot = boot, boot_ind = boot_ind,
+                            numCores = numCores, seed = seed)
+    }else if(est_type == "outcome-bart"){
+      # 2.2: BART (outcome-bart)
+      ## would like to be able to pass in the following for bart
+      ## nsample = 1000, nburn = 1000, nchains = 4
+      tpate_fit <- proj_bart(formula_outcome = formula_proj,
+                             treatment = treatment,
+                             exp_data = exp_data,
+                             pop_data = pop_data,
+                             pop_weights = pop_weights)
+    }
   }
 
-  ## wls-controls-logit
-  if(estimator_type == "wls-controls-logit") {
-    ## get logit weights
-    weights <- ipw_weights(exp_data, pop_data, formula_weights)
-    res <- wls(exp_data,
-               ## Run formula on formula_outcome + treatment, with weights
-               formula_outcome = update(formula_outcome, paste("~ . +", treatment)),
-               treatment = treatment, weights = weights,
-               pop_weights = pop_weights, ...)$est
-  }
-
-  ## wls-controls-cal
-  if(estimator_type == "wls-controls-cal") {
-    ## get calibration weights
-    weights <- cal_weights(exp_data, pop_data, formula_weights)
-    res <- wls(exp_data,
-               ## Run formula on formula_outcome + treatment, with weights
-               formula_outcome = update(formula_outcome, paste("~ . +", treatment)),
-               treatment = treatment, weights = weights,
-               pop_weights = pop_weights, ...)$est
-  }
-
-  ## outcome-ols
-  if(estimator_type == "outcome-ols") {
-    res <- ols_proj(exp_data, pop_data,
-                    formula_outcome = formula_outcome,
-                    pop_weights = pop_weights)
-  }
-
-  ## outcome-bart
-  ## would like to be able to pass in the following for bart
-  ## nsample = 1000, nburn = 1000, nchains = 4
-  if(estimator_type == "outcome-bart") {
-    res <- bart_projection(exp_data, pop_data,
-                           formula_outcome = formula_outcome,
-                           treatment = treatment,
-                           pop_weights = pop_weights, ...)
-  }
+  # 3. Doubly-Robust Estimators
 
   ## "dr-bart-logit"
   if(estimator_type == "dr-bart-logit") {
