@@ -19,19 +19,6 @@ gen_bootstrap(
   seed = 1234
 )
 }
-\arguments{
-\item{est}{Function of Estimators}
-
-\item{formula_outcome}{Formula for outcome model}
-
-\item{formula_weights}{Formula for sampling weights}
-
-\item{treatment}{Name of the treatment variable}
-
-\item{exp_data}{Experimental Data}
-
-\item{pop_data}{Population Data}
-}
 \description{
 Generic Bootstrap function
 }

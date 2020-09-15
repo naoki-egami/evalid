@@ -6,6 +6,15 @@
 \usage{
 boot_data(x, seed, data, boot_ind)
 }
+\arguments{
+\item{x}{A}
+
+\item{seed}{A}
+
+\item{data}{A}
+
+\item{boot_ind}{A}
+}
 \description{
 Generate Bootstrap data
 }

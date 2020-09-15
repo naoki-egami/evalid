@@ -1,12 +1,4 @@
 #' Generic Bootstrap function
-#' @param est Function of Estimators
-#' @param formula_outcome Formula for outcome model
-#' @param formula_weights Formula for sampling weights
-#' @param treatment Name of the treatment variable
-#' @param exp_data Experimental Data
-#' @param pop_data Population Data
-#' @export
-
 
 gen_bootstrap <- function(est, numCores, sims = 1000,
                           formula_outcome,
@@ -100,11 +92,10 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
 
 
 #' Generate Bootstrap data
-#' @param x
-#' @param seed
-#' @param data
-#' @param boot_ind
-#' @export
+#' @param x A
+#' @param seed A
+#' @param data A
+#' @param boot_ind A
 
 boot_data <- function(x, seed, data, boot_ind){
 

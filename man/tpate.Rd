@@ -22,7 +22,7 @@ tpate(
 )
 }
 \arguments{
-\item{formula_outcome}{Formula for outcome model}
+\item{formula_outcome}{Formula for outcome model (should include treatment)}
 
 \item{formula_weights}{Formula for sampling weights}
 
@@ -32,17 +32,27 @@ tpate(
 
 \item{pop_data}{Population Data}
 
-\item{estimator_type}{Whether we use a paired-choice conjoint design}
+\item{est_type}{Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`}
+
+\item{weights_type}{Weights Type; `logit`, `calibration`}
+
+\item{weights_max}{Default is `Inf`}
+
+\item{pop_weights}{Default is `NULL`.}
+
+\item{boot}{Whther you do bootstrap (`TRUE` or `FALSE`)}
+
+\item{sims}{The number of simulations}
+
+\item{numCores}{The number of cores we use}
+
+\item{seed}{seed (default = `1234`)}
 }
 \value{
-\code{model_pAMCE} returns an object of \code{pAMCE} class.
+\code{tpate} returns the following values.
  \itemize{
-   \item \code{AMCE}: Estimates of the pAMCE for all factors.
-   \item \code{boot_AMCE}: Estimates of the pAMCE for all factors in each bootstrap sample.
-   \item \code{boot_coef}: Estimates of coefficients for the linear probability model in each bootstrap sample.
-   \item \code{approach}: "model_based"
-   \item \code{input}: Input into the function.
-   \item \code{...}: Values for internal use.
+   \item \code{sate}: Estimates of the SATE
+   \item \code{tpate}: Estimates of the T-PATE
  }
 }
 \description{

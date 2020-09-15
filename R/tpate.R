@@ -1,10 +1,17 @@
 #' Estimating the Target Population Average Treatment Effect (TPATE)
-#' @param formula_outcome Formula for outcome model
+#' @param formula_outcome Formula for outcome model (should include treatment)
 #' @param formula_weights Formula for sampling weights
 #' @param treatment Name of the treatment variable
 #' @param exp_data Experimental Data
 #' @param pop_data Population Data
-#' @param estimator_type Whether we use a paired-choice conjoint design
+#' @param est_type Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`
+#' @param weights_type Weights Type; `logit`, `calibration`
+#' @param weights_max Default is `Inf`
+#' @param pop_weights Default is `NULL`.
+#' @param boot Whther you do bootstrap (`TRUE` or `FALSE`)
+#' @param sims The number of simulations
+#' @param numCores The number of cores we use
+#' @param seed seed (default = `1234`)
 #' @import estimatr
 #' @import bartCause
 #' @import survey
@@ -13,14 +20,10 @@
 #' @importFrom pbapply pblapply
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach "%dopar%" "%do%" foreach
-#' @return \code{model_pAMCE} returns an object of \code{pAMCE} class.
+#' @return \code{tpate} returns the following values.
 #'  \itemize{
-#'    \item \code{AMCE}: Estimates of the pAMCE for all factors.
-#'    \item \code{boot_AMCE}: Estimates of the pAMCE for all factors in each bootstrap sample.
-#'    \item \code{boot_coef}: Estimates of coefficients for the linear probability model in each bootstrap sample.
-#'    \item \code{approach}: "model_based"
-#'    \item \code{input}: Input into the function.
-#'    \item \code{...}: Values for internal use.
+#'    \item \code{sate}: Estimates of the SATE
+#'    \item \code{tpate}: Estimates of the T-PATE
 #'  }
 #' @description \code{tpate} implements the effect-generalization.
 #' @references Egami and Hartman. (2020+). Elements of External Validity: Framework, Design, and Analysis
