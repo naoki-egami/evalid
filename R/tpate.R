@@ -4,7 +4,7 @@
 #' @param treatment Name of the treatment variable
 #' @param exp_data Experimental Data
 #' @param pop_data Population Data
-#' @param est_type Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`
+#' @param est_type Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`, or `wls-proj`
 #' @param weights_type Weights Type; `logit`, `calibration`
 #' @param weights_max Default is `Inf`
 #' @param pop_weights Default is `NULL`.
@@ -119,7 +119,7 @@ tpate <- function(formula_outcome,
   }
 
   # 2. Outcome-based Estimators
-  if(est_type == "outcome-ols" | est_type == "outome-bart"){
+  if(est_type == "outcome-ols" | est_type == "outcome-bart"){
     formula_proj <- update(formula_outcome, paste("~ . -", treatment))
     if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
@@ -173,6 +173,18 @@ tpate <- function(formula_outcome,
                            pop_weights = pop_weights,
                            boot = TRUE, sims = sims, boot_ind = boot_ind,
                            numCores = numCores, seed = seed)
+  }else if(est_type == "wls-proj") {
+    formula_proj <- update(formula_outcome, paste("~ . -", treatment))
+    tpate_fit <- wls_proj(formula_outcome = formula_proj,
+                          formula_weights = formula_weights,
+                          treatment = treatment,
+                          exp_data = exp_data,
+                          pop_data = pop_data,
+                          weights_type = weights_type,
+                          weights_max = weights_max,
+                          pop_weights = pop_weights,
+                          boot = TRUE, sims = sims, boot_ind = boot_ind,
+                          numCores = numCores, seed = seed)
   }
 
   out <- list(sate = sate_fit, tpate = tpate_fit)

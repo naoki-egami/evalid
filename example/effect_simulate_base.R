@@ -1,6 +1,6 @@
 
 # Simulation Main Code
-rm(list = ls())d
+rm(list = ls())
 source("example/effect_dgp.R")
 
 K <- 5
@@ -108,6 +108,19 @@ dr_cal_bart <- tpate(formula_outcome = formula_outcome,
                        est_type = "dr-bart",
                        sims = 1000)
 
+wls_proj_logit <- tpate(formula_outcome = formula_outcome,
+                    formula_weights = formula_weights,
+                    exp_data = exp_data, pop_data = pop_data,
+                    treatment = "treatment", weights_type = "logit",
+                    est_type = "wls-proj",
+                    sims = 1000)
+wls_proj_cal <- tpate(formula_outcome = formula_outcome,
+                     formula_weights = formula_weights,
+                     exp_data = exp_data, pop_data = pop_data,
+                     treatment = "treatment", weights_type = "calibration",
+                     est_type = "wls-proj",
+                     sims = 1000)
+
 est_tab <- as.matrix(rbind(ipw_logit$tpate,
                            ipw_cal$tpate,
                            wls_logit$tpate,
@@ -117,13 +130,15 @@ est_tab <- as.matrix(rbind(ipw_logit$tpate,
                            dr_logit_ols$tpate,
                            dr_logit_bart$tpate,
                            dr_cal_ols$tpate,
-                           dr_cal_bart$tpate))
+                           dr_cal_bart$tpate,
+                           wls_proj_logit$tpate,
+                           wls_proj_cal$tpate))
 
-plot(seq(1:10), est_tab[,1], pch = 19, ylim = c(-2, 1), xaxt = "n")
-segments(seq(1:10), unlist(est_tab[, 3]),
-         seq(1:10), unlist(est_tab[, 4]))
+plot(seq(1:12), est_tab[,1], pch = 19, ylim = c(-2, 1), xaxt = "n")
+segments(seq(1:12), unlist(est_tab[, 3]),
+         seq(1:12), unlist(est_tab[, 4]))
 abline(h = pate_true, lwd = 2, col = "red")
-Axis(side = 1, at = seq(1:10),
+Axis(side = 1, at = seq(1:12),
      labels = c("ipw_logit",
                 "ipw_cal",
                 "wls_logit",
@@ -133,4 +148,6 @@ Axis(side = 1, at = seq(1:10),
                 "dr_logit_ols",
                 "dr_logit_bart",
                 "dr_cal_ols",
-                "dr_cal_bart"))
+                "dr_cal_bart",
+                "wls_proj_logit",
+                "wls_proj_cal"))
