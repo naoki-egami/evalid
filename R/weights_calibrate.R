@@ -10,7 +10,7 @@ create_targets <- function (target_design, target_formula) {
 
 ## Construct calibration weights
 weights_cal <- function(formula_weights, exp_data, pop_data,
-                        calfun = "raking", weight_max = Inf,
+                        calfun = "raking", weights_max = Inf,
                         pop_weights = NULL) {
 
   if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
@@ -35,8 +35,8 @@ weights_cal <- function(formula_weights, exp_data, pop_data,
                         calfun = calfun)
 
   ## Trim weights
-  if(is.finite(weight_max)) {
-    PATE_cal <- trimWeights(PATE_cal, upper = weight_max)
+  if(is.finite(weights_max)) {
+    PATE_cal <- trimWeights(PATE_cal, upper = weights_max)
   }
 
   return(weights(PATE_cal))

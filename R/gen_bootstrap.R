@@ -8,7 +8,7 @@
 #' @export
 
 
-gen_bootstrap <- function(est, numCores, boot = 1000,
+gen_bootstrap <- function(est, numCores, sims = 1000,
                           formula_outcome,
                           formula_weights,
                           treatment,
@@ -19,7 +19,7 @@ gen_bootstrap <- function(est, numCores, boot = 1000,
                           boot_ind = NULL,
                           seed = 1234){
 
-  message(paste("\nBootstrap (", boot, "):\n", sep = ""))
+  message(paste("\nBootstrap (", sims, "):\n", sep = ""))
 
 
   if(Sys.info()[['sysname']] == 'Windows') {
@@ -29,7 +29,7 @@ gen_bootstrap <- function(est, numCores, boot = 1000,
     # ------------
 
     if (numCores == 1){
-      fit_boot <- pblapply(1:boot, function(x)
+      fit_boot <- pblapply(1:sims, function(x)
         est(x,
             formula_outcome = formula_outcome,
             formula_weights = formula_weights,
@@ -52,7 +52,7 @@ gen_bootstrap <- function(est, numCores, boot = 1000,
       #     registerDoParallel(cl)
       #     on.exit(stopCluster(cl))
 
-      fit_boot <- foreach(i = 1:boot,
+      fit_boot <- foreach(i = 1:sims,
                           .packages = c("estimatr")) %dopar% {
                             est(x = i,
                                 formula_outcome = formula_outcome,
@@ -73,7 +73,7 @@ gen_bootstrap <- function(est, numCores, boot = 1000,
     # ------------
     # Mac
     # ------------
-    fit_boot <- pbmclapply(seq(1:boot), function(x) est(x,
+    fit_boot <- pbmclapply(seq(1:sims), function(x) est(x,
                                                         formula_outcome = formula_outcome,
                                                         formula_weights = formula_weights,
                                                         treatment = treatment,

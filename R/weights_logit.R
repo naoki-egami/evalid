@@ -1,5 +1,5 @@
 ## Calculate logit weights
-weights_logit <- function(formula_weights, exp_data, pop_data, weight_max = Inf,
+weights_logit <- function(formula_weights, exp_data, pop_data, weights_max = Inf,
                           pop_weights = NULL, ...) {
 
   ## gather the covariate terms
@@ -12,7 +12,7 @@ weights_logit <- function(formula_weights, exp_data, pop_data, weight_max = Inf,
   if(is.null(pop_weights)) {
     full_data$pop_weights_logit = rep(1, nrow(full_data))
   } else {
-    full_data$pop_weights_logit = c(rep(1, nrow(sample)), pop_weights)
+    full_data$pop_weights_logit = c(rep(1, nrow(exp_data)), pop_weights)
   }
 
   ## make formula of S on collapsed covariates
@@ -33,7 +33,7 @@ weights_logit <- function(formula_weights, exp_data, pop_data, weight_max = Inf,
   #                                         upper = weight_max))
   # }
 
-  weights_sample[weights_sample > weight_max] <- weight_max
+  weights_sample[weights_sample > weights_max] <- weights_max
 
 
   return(weights_sample)

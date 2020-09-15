@@ -1,5 +1,8 @@
-proj_bart <- function(formula_outcome, treatment,
-                      exp_data, pop_data,  pop_weights = NULL) {
+proj_bart <- function(formula_outcome,
+                      treatment,
+                      exp_data, pop_data,
+                      pop_weights = NULL,
+                      sims = 1000) {
 
   ## Determine outcome variable name and covariates
   ## (note, might instead track outcome var name)

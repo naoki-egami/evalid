@@ -9,7 +9,7 @@ wls <- function(formula_outcome,
                 treatment, exp_data,
                 weights = NULL,
                 pop_weights = NULL,
-                boot = FALSE, boot_ind = NULL,
+                boot = TRUE, sims = 1000, boot_ind = NULL,
                 numCores = 1, seed = 1234){
 
   ## Naoki: I have not included pop_weights into the estimation
@@ -28,7 +28,7 @@ wls <- function(formula_outcome,
     out <- list(est = est, se = se, ci_lower = lm_w_ci[1], ci_upper = lm_w_ci[2])
   }else{
 
-    out <- gen_bootstrap(est = wls_base, numCores = numCores, boot = boot,
+    out <- gen_bootstrap(est = wls_base, numCores = numCores, sims = sims,
                          formula_outcome = formula_outcome, formula_weights = NULL,
                          treatment = treatment, exp_data = exp_data, pop_data = NULL,
                          weights = weights, pop_weights = pop_weights,

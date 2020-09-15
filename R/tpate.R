@@ -32,11 +32,10 @@ tpate <- function(formula_outcome,
                   treatment,
                   exp_data,
                   pop_data,
-                  type = "weighting",
-                  outcome_type = "ols",
-                  weights_type = "calibration",
+                  est_type = "wls",
+                  weights_type = "calibration", weights_max = Inf,
                   pop_weights = NULL,
-                  boot = FALSE, numCores = NULL, seed = 1234,
+                  boot = TRUE, sims = 1000, numCores = NULL, seed = 1234,
                   ...) {
 
   ## Error handling that needs to be done:
@@ -50,6 +49,7 @@ tpate <- function(formula_outcome,
   ## Need to take in alpha level, right now assumes 0.05 (for the bart posteriors)
 
   ## Naoki: I will work on Error Handling Later.
+  ## Naoki: I think bartCause is risky to use. We will change it later.
 
   # ###################
   # Setup
@@ -79,7 +79,8 @@ tpate <- function(formula_outcome,
                   treatment = treatment,
                   exp_data = exp_data,
                   weights = NULL, pop_weights = pop_weights,
-                  boot = boot, boot_ind = boot_ind,
+                  boot = boot,
+                  sims = sims, boot_ind = boot_ind,
                   numCores = numCores, seed = seed)
 
   # 1. Weighting-based Estimators
@@ -88,12 +89,12 @@ tpate <- function(formula_outcome,
       ## get logit weights
       ipw_weights <- weights_logit(formula_weights = formula_weights,
                                    exp_data = exp_data, pop_data = pop_data,
-                                   weight_max = Inf, pop_weights = pop_weights)
+                                   weights_max = weights_max, pop_weights = pop_weights)
     }else if(weights_type == "calibration"){
       ## get calibration weights
       ipw_weights <- weights_cal(formula_weights = formula_weights,
                                  exp_data = exp_data, pop_data = pop_data,
-                                 calfun = "raking", weight_max = Inf,
+                                 calfun = "raking", weights_max = weights_max,
                                  pop_weights = pop_weights)
     }
 
@@ -109,7 +110,8 @@ tpate <- function(formula_outcome,
                      treatment = treatment,
                      exp_data = exp_data,
                      weights = ipw_weights, pop_weights = pop_weights,
-                     boot = boot, boot_ind = boot_ind,
+                     boot = boot,
+                     sims = sims, boot_ind = boot_ind,
                      numCores = numCores, seed = seed)
   }
 
@@ -126,7 +128,8 @@ tpate <- function(formula_outcome,
                             exp_data = exp_data,
                             pop_data = pop_data,
                             pop_weights = pop_weights,
-                            boot = boot, boot_ind = boot_ind,
+                            boot = boot,
+                            sims = sims, boot_ind = boot_ind,
                             numCores = numCores, seed = seed)
     }else if(est_type == "outcome-bart"){
       # 2.2: BART (outcome-bart)
@@ -136,114 +139,40 @@ tpate <- function(formula_outcome,
                              treatment = treatment,
                              exp_data = exp_data,
                              pop_data = pop_data,
-                             pop_weights = pop_weights)
+                             pop_weights = pop_weights,
+                             sims = sims)
     }
   }
 
   # 3. Doubly-Robust Estimators
-
-  ## "dr-bart-logit"
-  if(estimator_type == "dr-bart-logit") {
-    ## get logit weights
-    weights <- ipw_weights(exp_data, pop_data, formula_weights = formula_weights,
-                           pop_weights = pop_weights)
-    ## do bart projection and bart aipw
-    res <- bart_projection(exp_data, pop_data,
-                           formula_outcome = formula_outcome,
-                           treatment = treatment,
-                           do_aipw = TRUE, weights = weights,
-                           pop_weights = pop_weights, ...)
-  }
-
-  ## "dr-bart-cal"
-  if(estimator_type == "dr-bart-cal") {
-    ## get calibration weights
-    weights <- cal_weights(exp_data, pop_data, formula_weights = formula_weights,
-                           pop_weights = pop_weights)
-    ## do bart projection and bart aipw
-    res <- bart_projection(exp_data, pop_data,
-                           formula_outcome = formula_outcome,
-                           treatment = treatment,
-                           do_aipw = TRUE, weights = weights,
-                           pop_weights = pop_weights, ...)
-  }
-
-  ## dr-ols-logit
-  if(estimator_type == "dr-ols-logit") {
-    ## get logit weights
-    weights <- ipw_weights(exp_data, pop_data, formula_weights = formula_weights,
-                           pop_weights = pop_weights)
-    ## do ols projection, get models back
-    proj <- ols_proj(exp_data, pop_data,
-                     formula_outcome = formula_outcome,
-                     return_models = TRUE,
-                     pop_weights = pop_weights, ...)
-
-    ## get residuals
-    exp_data$resids <- exp_data$Y -
-      ifelse(exp_data$treatment == 1,
-             ## if true project model Y1
-             predict(proj$mod_1, newdata = exp_data),
-             ## if false, project model Y0
-             predict(proj$mod_0, newdata = exp_data))
-    ## add wls on residuals to projection estimate
-    res <- proj$pate_proj +
-      wls(exp_data,
-          ## run model on residuals + treatment
-          update(resids ~ 1, paste("~ . +", treatment)),
-          treatment = treatment, weights = weights,
-          pop_weights = pop_weights, ...)$est
-  }
-
-  ## dr-ols-cal
-  if(estimator_type == "dr-ols-cal") {
-    ## get calibration weights
-    weights <- cal_weights(exp_data, pop_data, formula_weights = formula_weights,
-                           pop_weights = pop_weights)
-    ## do ols projection, get models back
-    proj <- ols_proj(exp_data, pop_data, formula_outcome = formula_outcome, return_models = TRUE
-                     pop_weights = pop_weights, ...)
-    ## get residuals
-    exp_data$res <- exp_data$Y -
-      ifelse(exp_data$treatment == 1,
-             ## if true project model Y1
-             predict(proj$mod_1, newdata = exp_data),
-             ## if false, project model Y0
-             predict(proj$mod_0, newdata = exp_data))
-    ## add wls on residuals to projection estimate
-    res <- proj$pate_proj +
-      wls(exp_data,
-          ## run model on residuals + treatment
-          update(res ~ 1, paste("~ . +", treatment)),
-          treatment = treatment, weights = weights,
-          pop_weights = pop_weights, ...)$est
-  }
-
-  ## dr-wls-logit
-  if(estimator_type == "dr-wls-logit") {
-    ## get logit weights
-    weights <- ipw_weights(exp_data, pop_data, formula_weights = formula_weights,
-                           pop_weights = pop_weights)
-    ## get doubly robust wLS projection
-    res <- wls_projection(exp_data, pop_data,
-                          formula_outcome = formula_outcome,
+  if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
+  if(est_type == "dr-ols") {
+    formula_proj <- update(formula_outcome, paste("~ . -", treatment))
+    tpate_fit <- aipw_ols(formula_outcome = formula_proj,
+                          formula_weights = formula_weights,
                           treatment = treatment,
-                          weights = weights,
-                          pop_weights = pop_weights, ...)
+                          exp_data = exp_data,
+                          pop_data = pop_data,
+                          weights_type = weights_type,
+                          weights_max = weights_max,
+                          pop_weights = pop_weights,
+                          boot = TRUE, sims = sims, boot_ind = boot_ind,
+                          numCores = numCores, seed = seed)
+  }else if(est_type == "dr-bart") {
+    formula_proj <- update(formula_outcome, paste("~ . -", treatment))
+    tpate_fit <- aipw_bart(formula_outcome = formula_proj,
+                           formula_weights = formula_weights,
+                           treatment = treatment,
+                           exp_data = exp_data,
+                           pop_data = pop_data,
+                           weights_type = weights_type,
+                           weights_max = weights_max,
+                           pop_weights = pop_weights,
+                           boot = TRUE, sims = sims, boot_ind = boot_ind,
+                           numCores = numCores, seed = seed)
   }
 
-  ## dr-wls-cal
-  if(estimator_type == "dr-wls-cal") {
-    ## get calibratoin weights
-    weights <- cal_weights(exp_data, pop_data, formula_weights = formula_weights,
-                           pop_weights = pop_weights)
-    ## get doubly robust wLS projection
-    res <- wls_projection(exp_data, pop_data,
-                          formula_outcome = formula_outcome,
-                          treatment = treatment,
-                          weights = weights,
-                          pop_weights = pop_weights, ...)
-  }
+  out <- list(sate = sate_fit, tpate = tpate_fit)
 
-  return(res)
+  return(out)
 }
