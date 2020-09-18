@@ -19,16 +19,15 @@ proj_bart <- function(formula_outcome,
   # pop_data$chunks <- cut(1:nrow(pop_data), max(2, nrow(pop_data) %/% 1000))
   #
 
-  std_pop_weights <- pop_weights / sum(pop_weights)
   ## project Y1
   bart_proj_1 <- t(t(predict(bart_fit,
                              newdata = pop_data[, covariates],
-                             type = "y.1")) * std_pop_weights)
+                             type = "y.1")) * pop_weights)
 
   ## project Y0
   bart_proj_0 <- t(t(predict(bart_fit,
                              newdata = pop_data[, covariates],
-                             type = "y.0")) * std_pop_weights)
+                             type = "y.0")) * pop_weights)
 
   ## distribution of PATE estimates
   bart_pates <- apply(bart_proj_1 - bart_proj_0, 1, mean, na.rm = TRUE)
