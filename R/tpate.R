@@ -41,6 +41,7 @@ tpate <- function(formula_outcome,
                   weights_type = "calibration", weights_max = Inf,
                   boot = TRUE, id_cluster = NULL,
                   sims = 1000, numCores = NULL, seed = 1234,
+                  compute_sate = TRUE,
                   ...) {
 
   ## Error handling that needs to be done:
@@ -76,16 +77,21 @@ tpate <- function(formula_outcome,
   # For now, I assume that we only do the complete randomization.
   boot_ind <- id_cluster
 
-  ## Estimate SATE with difference in means (Always)
-  formula_sate <- as.formula(paste0(outcome, "~", paste0(treatment, collapse = " + ")))
-  ## Run formula on outcome + treatment, no weights
-  sate_fit <- wls(formula_outcome = formula_sate,
-                  treatment = treatment,
-                  exp_data = exp_data,
-                  weights = NULL, pop_weights = pop_weights,
-                  boot = boot,
-                  sims = sims, boot_ind = boot_ind,
-                  numCores = numCores, seed = seed)
+  if(compute_sate) {
+    ## Estimate SATE with difference in means (Always)
+    formula_sate <- as.formula(paste0(outcome, "~", paste0(treatment, collapse = " + ")))
+    ## Run formula on outcome + treatment, no weights
+    sate_fit <- wls(formula_outcome = formula_sate,
+                    treatment = treatment,
+                    exp_data = exp_data,
+                    weights = NULL, pop_weights = pop_weights,
+                    boot = boot,
+                    sims = sims, boot_ind = boot_ind,
+                    numCores = numCores, seed = seed)
+  } else{
+    sate_fit <- NA
+  }
+
 
   # 1. Weighting-based Estimators
   if(est_type == "ipw" | est_type == "wls"){
