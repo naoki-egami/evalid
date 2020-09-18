@@ -22,7 +22,7 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
 
     if (numCores == 1){
       fit_boot <- pblapply(1:sims, function(x)
-        est(x,
+        tryCatch(est(x,
             formula_outcome = formula_outcome,
             formula_weights = formula_weights,
             treatment = treatment,
@@ -31,8 +31,8 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
             weights = weights,
             pop_weights = pop_weights,
             boot_ind = boot_ind,
-            seed = seed))
-    }else {
+            seed = seed), error = function(e) NA))
+    } else {
 
       cl <- makeCluster(numCores)
       registerDoParallel(cl)
@@ -46,7 +46,7 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
 
       fit_boot <- foreach(i = 1:sims,
                           .packages = c("estimatr")) %dopar% {
-                            est(x = i,
+                            tryCatch(est(x = i,
                                 formula_outcome = formula_outcome,
                                 formula_weights = formula_weights,
                                 treatment = treatment,
@@ -55,7 +55,7 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
                                 weights = weights,
                                 pop_weights = pop_weights,
                                 boot_ind = boot_ind,
-                                seed = seed)
+                                seed = seed), error = function(e) NA)
                           }
       #close(pb)
       stopCluster(cl)
@@ -65,17 +65,19 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
     # ------------
     # Mac
     # ------------
-    fit_boot <- pbmclapply(seq(1:sims), function(x) est(x,
-                                                        formula_outcome = formula_outcome,
-                                                        formula_weights = formula_weights,
-                                                        treatment = treatment,
-                                                        exp_data = exp_data,
-                                                        pop_data = pop_data,
-                                                        weights = weights,
-                                                        pop_weights = pop_weights,
-                                                        boot_ind = boot_ind,
-                                                        seed = seed),
-                           mc.cores = numCores)
+    fit_boot <- pbmclapply(seq(1:sims), function(x) {
+      tryCatch(est(x,
+                   formula_outcome = formula_outcome,
+                   formula_weights = formula_weights,
+                   treatment = treatment,
+                   exp_data = exp_data,
+                   pop_data = pop_data,
+                   weights = weights,
+                   pop_weights = pop_weights,
+                   boot_ind = boot_ind,
+                   seed = seed),
+               mc.cores = numCores, error = function(e) NA)
+      })
   }
 
   # combine results
