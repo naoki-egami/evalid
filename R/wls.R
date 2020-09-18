@@ -52,7 +52,8 @@ wls_base <- function(x,
   ## Naoki: I have not included pop_weights into the estimation
 
   # Boostrap the data
-  boot_use <- boot_data(x = x, seed = seed, data = exp_data, boot_ind = boot_ind)
+  boot_use <- boot_data(x = x, seed = seed, data = exp_data,
+                        boot_ind = boot_ind)
   exp_data_b <- exp_data[boot_use, , drop = FALSE]
   weights_b <- weights[boot_use]
 

@@ -7,8 +7,8 @@
 #' @param est_type Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`, or `wls-proj`
 #' @param weights_type Weights Type; `logit`, `calibration`
 #' @param weights_max Default is `Inf`
-#' @param pop_weights Default is `NULL`.
 #' @param boot Whther you do bootstrap (`TRUE` or `FALSE`)
+#' @param id_cluster Identifies for cluster bootstrap
 #' @param sims The number of simulations
 #' @param numCores The number of cores we use
 #' @param seed seed (default = `1234`)
@@ -37,8 +37,8 @@ tpate <- function(formula_outcome,
                   pop_data,
                   est_type = "wls",
                   weights_type = "calibration", weights_max = Inf,
-                  pop_weights = NULL,
-                  boot = TRUE, sims = 1000, numCores = NULL, seed = 1234,
+                  boot = TRUE, id_cluster = NULL,
+                  sims = 1000, numCores = NULL, seed = 1234,
                   ...) {
 
   ## Error handling that needs to be done:
@@ -64,6 +64,7 @@ tpate <- function(formula_outcome,
 
 
   ## If pop_weights are null, assign as all 1
+  pop_weights <- NULL
   if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
   # Keep names of outcome variable
@@ -71,9 +72,7 @@ tpate <- function(formula_outcome,
 
   # prepare for Bootstrap
   # For now, I assume that we only do the complete randomization.
-  if(boot == TRUE){
-    boot_ind <- exp_data[, treatment]
-  }
+  boot_ind <- id_cluster
 
   ## Estimate SATE with difference in means (Always)
   formula_sate <- as.formula(paste0(outcome, "~", paste0(treatment, collapse = " + ")))

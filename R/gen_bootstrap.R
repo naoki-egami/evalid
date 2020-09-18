@@ -106,17 +106,22 @@ boot_data <- function(x, seed, data, boot_ind){
   set.seed(seed.b)
 
   # Stratified Bootstrap (bootstrap within strata)
-  uniq_strata <- unique(boot_ind)
-  pos_strata <- lapply(uniq_strata, function(x) which(x == boot_ind))
-  boot_which <- lapply(pos_strata, function(x) sample(x, size = length(x), replace = TRUE))
-  # data_b <- data[unlist(boot_which), , drop = FALSE]
-  boot_use <- unlist(boot_which)
-  # Block Bootstrap (bootstrap blocks)
-  # boot_id0 <- sample(unique(boot_ind), size = length(unique(boot_ind)), replace = TRUE)
-  # # create bootstap sample with sapply
-  # boot_which <- sapply(boot_id0, function(x) which(boot_ind == x))
-  # new_boot_id <- rep(seq(1:length(boot_id0)), times = unlist(lapply(boot_which, length)))
-  # data_b <- data[unlist(boot_which), , drop = FALSE]
+  # uniq_strata <- unique(boot_ind)
+  # pos_strata <- lapply(uniq_strata, function(x) which(x == boot_ind))
+  # boot_which <- lapply(pos_strata, function(x) sample(x, size = length(x), replace = TRUE))
+  # # data_b <- data[unlist(boot_which), , drop = FALSE]
+  # boot_use <- unlist(boot_which)
+
+  if(is.null(boot_ind) == FALSE){
+    # Block Bootstrap (within each treatment)
+    boot_id0 <- sample(unique(boot_ind), size = length(unique(boot_ind)), replace = TRUE)
+    # # create bootstap sample with sapply
+    boot_which <- sapply(boot_id0, function(x) which(boot_ind == x))
+    boot_use <- unlist(boot_which)
+  }else if(is.null(boot_ind) == TRUE){
+    boot_use <- sample(1:nrow(data), size = nrow(data), replace = TRUE)
+  }
+
   return(boot_use)
 }
 
