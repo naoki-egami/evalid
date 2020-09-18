@@ -16,6 +16,7 @@ Imports:
     pbmcapply,
     pbapply,
     doParallel,
+    parallel,
     foreach,
     estimatr,
     bartCause,

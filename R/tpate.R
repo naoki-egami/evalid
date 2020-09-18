@@ -18,8 +18,10 @@
 #' @import tidyverse
 #' @importFrom pbmcapply pbmclapply
 #' @importFrom pbapply pblapply
+#' @importFrom parallel detectCores
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach "%dopar%" "%do%" foreach
+#' @importFrom mvtnorm rmvnorm
 #' @return \code{tpate} returns the following values.
 #'  \itemize{
 #'    \item \code{sate}: Estimates of the SATE

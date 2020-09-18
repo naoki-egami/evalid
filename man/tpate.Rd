@@ -13,8 +13,8 @@ tpate(
   est_type = "wls",
   weights_type = "calibration",
   weights_max = Inf,
-  pop_weights = NULL,
   boot = TRUE,
+  id_cluster = NULL,
   sims = 1000,
   numCores = NULL,
   seed = 1234,
@@ -32,15 +32,15 @@ tpate(
 
 \item{pop_data}{Population Data}
 
-\item{est_type}{Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`}
+\item{est_type}{Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`, or `wls-proj`}
 
 \item{weights_type}{Weights Type; `logit`, `calibration`}
 
 \item{weights_max}{Default is `Inf`}
 
-\item{pop_weights}{Default is `NULL`.}
-
 \item{boot}{Whther you do bootstrap (`TRUE` or `FALSE`)}
+
+\item{id_cluster}{Identifies for cluster bootstrap}
 
 \item{sims}{The number of simulations}
 
