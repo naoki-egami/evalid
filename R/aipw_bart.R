@@ -34,16 +34,16 @@ aipw_bart <- function(formula_outcome,
   # ###############################
   # Projection to the Population
   # ###############################
-  std_pop_weights <- pop_weights / sum(pop_weights)
+
   ## project Y1
   bart_proj_1 <- t(predict(bart_fit,
                            newdata = pop_data[, covariates],
-                           type = "y.1")) * std_pop_weights
+                           type = "y.1")) * pop_weights
 
   ## project Y0
   bart_proj_0 <- t(predict(bart_fit,
                            newdata = pop_data[, covariates],
-                           type = "y.0")) * std_pop_weights
+                           type = "y.0")) * pop_weights
 
   # #######################
   # Predict on to sample
