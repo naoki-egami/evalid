@@ -18,6 +18,7 @@ tpate(
   sims = 1000,
   numCores = NULL,
   seed = 1234,
+  compute_sate = TRUE,
   ...
 )
 }

@@ -21,7 +21,7 @@
 #' @importFrom parallel detectCores
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach "%dopar%" "%do%" foreach
-#' @importFrom mvtnorm rmvnorm
+#' @importFrom MASS mvrnorm
 #' @return \code{tpate} returns the following values.
 #'  \itemize{
 #'    \item \code{sate}: Estimates of the SATE
