@@ -75,9 +75,8 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
                    weights = weights,
                    pop_weights = pop_weights,
                    boot_ind = boot_ind,
-                   seed = seed),
-               mc.cores = numCores, error = function(e) NA)
-      })
+                   seed = seed), error = function(e) NA)
+      }, mc.cores = numCores)
   }
 
   # combine results
