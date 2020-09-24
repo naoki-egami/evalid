@@ -7,7 +7,7 @@
 #' @param est_type Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`, or `wls-proj`
 #' @param weights_type Weights Type; `logit`, `calibration`
 #' @param weights_max Default is `Inf`
-#' @param boot Whther you do bootstrap (`TRUE` or `FALSE`)
+#' @param boot Whether you do bootstrap (`TRUE` or `FALSE`)
 #' @param id_cluster Identifies for cluster bootstrap
 #' @param sims The number of simulations
 #' @param numCores The number of cores we use
