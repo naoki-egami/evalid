@@ -4,43 +4,62 @@ proj_ols <- function(formula_outcome, exp_data, pop_data,
                      pop_weights = NULL,
                      boot = TRUE,
                      sims = 1000, boot_ind = NULL,
-                     numCores = 1, seed = 1234) {
+                     numCores = 1, seed = 1234, internal = FALSE) {
 
-  if(boot == FALSE){
-    ## Run models separately on Y1 and Y0
+  if(internal == FALSE){
+    if(boot == FALSE){
+      ## Run models separately on Y1 and Y0
+      lm_mod_1 <- lm(formula_outcome,
+                     data = exp_data[exp_data[, treatment] == 1, , drop = FALSE])
+      lm_mod_0 <- lm(formula_outcome,
+                     data = exp_data[exp_data[, treatment] == 0, , drop = FALSE])
+
+      coef_t <- mvrnorm(n = sims, mu = coef(lm_mod_1), Sigma = vcov(lm_mod_1))
+      coef_c <- mvrnorm(n = sims, mu = coef(lm_mod_0), Sigma = vcov(lm_mod_0))
+
+      fit_X <- paste0("~", as.character(formula(lm_mod_1))[3])
+
+      X_pop <- model.matrix(formula(fit_X), data = pop_data)
+
+      predict_t <- X_pop %*% t(coef_t)
+      predict_c <- X_pop %*% t(coef_c)
+
+      pate_sim <- apply(predict_t - predict_c, 2, weighted.mean, w = pop_weights)
+      est <- mean(pate_sim, na.rm = TRUE)
+      se <- sd(pate_sim, na.rm = TRUE)
+      ci_lower <- quantile(pate_sim, prob = 0.025, na.rm = TRUE)
+      ci_upper <- quantile(pate_sim, prob = 0.975, na.rm = TRUE)
+
+      # results
+      out <- list(est = est, se = se, ci_lower = ci_lower, ci_upper = ci_upper)
+
+      return(out)
+    }else{
+
+      out <- gen_bootstrap(est = proj_ols_base, numCores = numCores, sims = sims,
+                           formula_outcome = formula_outcome, formula_weights = NULL,
+                           treatment = treatment, exp_data = exp_data, pop_data = pop_data,
+                           weights = NULL, pop_weights = pop_weights,
+                           boot_ind = boot_ind, seed = seed)
+    }
+  }else{
     lm_mod_1 <- lm(formula_outcome,
                    data = exp_data[exp_data[, treatment] == 1, , drop = FALSE])
     lm_mod_0 <- lm(formula_outcome,
                    data = exp_data[exp_data[, treatment] == 0, , drop = FALSE])
 
-    coef_t <- mvrnorm(n = sims, mu = coef(lm_mod_1), Sigma = vcov(lm_mod_1))
-    coef_c <- mvrnorm(n = sims, mu = coef(lm_mod_0), Sigma = vcov(lm_mod_0))
+    coef_t <- coef(lm_mod_1)
+    coef_c <- coef(lm_mod_0)
 
     fit_X <- paste0("~", as.character(formula(lm_mod_1))[3])
-
     X_pop <- model.matrix(formula(fit_X), data = pop_data)
 
-    predict_t <- X_pop %*% t(coef_t)
-    predict_c <- X_pop %*% t(coef_c)
+    predict_t <- X_pop %*% as.vector(coef_t)
+    predict_c <- X_pop %*% as.vector(coef_c)
 
-    pate_sim <- apply(predict_t - predict_c, 2, weighted.mean, w = pop_weights)
-    est <- mean(pate_sim, na.rm = TRUE)
-    se <- sd(pate_sim, na.rm = TRUE)
-    ci_lower <- quantile(pate_sim, prob = 0.025, na.rm = TRUE)
-    ci_upper <- quantile(pate_sim, prob = 0.975, na.rm = TRUE)
+    est <- mean(predict_t - predict_c, na.rm = TRUE)
 
-    # results
-    out <- list(est = est, se = se, ci_lower = ci_lower, ci_upper = ci_upper,
-                lm_mod_1 = lm_mod_1, lm_mod_0 = lm_mod_0)
-
-    return(out)
-  }else{
-
-    out <- gen_bootstrap(est = proj_ols_base, numCores = numCores, sims = sims,
-                         formula_outcome = formula_outcome, formula_weights = NULL,
-                         treatment = treatment, exp_data = exp_data, pop_data = pop_data,
-                         weights = NULL, pop_weights = pop_weights,
-                         boot_ind = boot_ind, seed = seed)
+    out <- list(est = est, lm_mod_1 = lm_mod_1, lm_mod_0 = lm_mod_0)
   }
 
   return(out)

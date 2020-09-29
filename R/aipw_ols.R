@@ -62,9 +62,7 @@ aipw_ols_base <- function(x,
                    exp_data = exp_data_b,
                    pop_data = pop_data,
                    pop_weights = pop_weights,
-                   boot = FALSE,
-                   sims = 2, boot_ind = NULL,
-                   numCores = 1, seed = 1234)
+                   boot = FALSE, boot_ind = NULL, internal = TRUE)
 
   Y <- exp_data_b[, all.vars(formula_outcome)[1]]
   treat <- exp_data_b[, treatment]

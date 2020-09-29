@@ -82,11 +82,11 @@ out_bart <- tpate(formula_outcome = formula_outcome,
 
 # 3. DR Estimator
 dr_logit_ols <- tpate(formula_outcome = formula_outcome,
-                 formula_weights = formula_weights,
-                 exp_data = exp_data, pop_data = pop_data,
-                 treatment = "treatment", weights_type = "logit",
-                 est_type = "dr-ols", id_cluster = exp_data$cluster,
-                 sims = 1000)
+                      formula_weights = formula_weights,
+                      exp_data = exp_data, pop_data = pop_data,
+                      treatment = "treatment", weights_type = "logit",
+                      est_type = "dr-ols", id_cluster = exp_data$cluster,
+                      sims = 1000)
 dr_logit_bart <- tpate(formula_outcome = formula_outcome,
                   formula_weights = formula_weights,
                   exp_data = exp_data, pop_data = pop_data,
