@@ -12,6 +12,7 @@
 #' @param sims The number of simulations
 #' @param numCores The number of cores we use
 #' @param seed seed (default = `1234`)
+#' @param compute_sate whether we compute SATE
 #' @import estimatr
 #' @import bartCause
 #' @import survey
@@ -77,8 +78,8 @@ tpate <- function(formula_outcome,
   # For now, I assume that we only do the complete randomization.
   boot_ind <- id_cluster
 
-  if(compute_sate) {
-    ## Estimate SATE with difference in means (Always)
+  if(compute_sate == TRUE) {
+    ## Estimate SATE with difference in means
     formula_sate <- as.formula(paste0(outcome, "~", paste0(treatment, collapse = " + ")))
     ## Run formula on outcome + treatment, no weights
     sate_fit <- wls(formula_outcome = formula_sate,

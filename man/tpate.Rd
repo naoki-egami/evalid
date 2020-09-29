@@ -39,7 +39,7 @@ tpate(
 
 \item{weights_max}{Default is `Inf`}
 
-\item{boot}{Whther you do bootstrap (`TRUE` or `FALSE`)}
+\item{boot}{Whether you do bootstrap (`TRUE` or `FALSE`)}
 
 \item{id_cluster}{Identifies for cluster bootstrap}
 
@@ -48,6 +48,8 @@ tpate(
 \item{numCores}{The number of cores we use}
 
 \item{seed}{seed (default = `1234`)}
+
+\item{compute_sate}{whether we compute SATE}
 }
 \value{
 \code{tpate} returns the following values.

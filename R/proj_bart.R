@@ -13,7 +13,7 @@ proj_bart <- function(formula_outcome,
   bart_fit <- bartc(response = exp_data[, outcome_var],
                     treatment = exp_data[, treatment],
                     confounders = as.matrix(exp_data[, covariates]),
-                    method.trt = "none", keepTrees = TRUE)
+                    method.trt = "none", keepTrees = TRUE, n.samples = ceiling(sims/10))
 
   # ## breaks the projection down in to chunks to avoid overly large matrix
   # pop_data$chunks <- cut(1:nrow(pop_data), max(2, nrow(pop_data) %/% 1000))

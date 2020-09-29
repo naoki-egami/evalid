@@ -29,7 +29,7 @@ aipw_bart <- function(formula_outcome,
   bart_fit <- bartc(response = exp_data[, outcome_var],
                     treatment = exp_data[, treatment],
                     confounders = as.matrix(exp_data[, covariates]),
-                    method.trt = "none", keepTrees = TRUE)
+                    method.trt = "none", keepTrees = TRUE, n.samples = ceiling(sims/10))
 
   # ###############################
   # Projection to the Population
