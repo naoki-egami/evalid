@@ -87,7 +87,10 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
   ci_lower <- quantile(estimate, 0.025, na.rm = TRUE)
   ci_upper <- quantile(estimate, 0.975, na.rm = TRUE)
 
-  out <- list(est = est, se = se, ci_lower = ci_lower, ci_upper = ci_upper)
+  # count the number of NAs
+  num_NA <- sum(is.na(estimate))
+
+  out <- list(est = est, se = se, ci_lower = ci_lower, ci_upper = ci_upper, num_NA = num_NA)
   return(out)
 }
 
