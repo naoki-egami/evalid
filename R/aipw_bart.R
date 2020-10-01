@@ -64,7 +64,8 @@ aipw_bart <- function(formula_outcome,
   se <- sd(estimate, na.rm = TRUE)
   ci_lower <- quantile(estimate, 0.025, na.rm = TRUE)
   ci_upper <- quantile(estimate, 0.975, na.rm = TRUE)
+  out_m <- list(est = est, se = se, ci_lower = ci_lower, ci_upper = ci_upper, ipw_weights = ipw_weights)
 
-  out <- list(est = est, se = se, ci_lower = ci_lower, ci_upper = ci_upper)
+  out <- list(out_m = out_m, ipw_weights = ipw_weights)
   return(out)
 }

@@ -56,6 +56,7 @@ tpate(
  \itemize{
    \item \code{sate}: Estimates of the SATE
    \item \code{tpate}: Estimates of the T-PATE
+   \item \code{ipw_weights}: Estimated weights
  }
 }
 \description{

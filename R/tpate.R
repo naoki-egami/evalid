@@ -27,6 +27,7 @@
 #'  \itemize{
 #'    \item \code{sate}: Estimates of the SATE
 #'    \item \code{tpate}: Estimates of the T-PATE
+#'    \item \code{ipw_weights}: Estimated weights
 #'  }
 #' @description \code{tpate} implements the effect-generalization.
 #' @references Egami and Hartman. (2020+). Elements of External Validity: Framework, Design, and Analysis
@@ -131,7 +132,6 @@ tpate <- function(formula_outcome,
     formula_proj <- update(formula_outcome, paste("~ . -", treatment))
     if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
-
     if(est_type == "outcome-ols") {
       # 2.1: OLS (outcome-ols)
       tpate_fit <- proj_ols(formula_outcome = formula_proj,
@@ -153,49 +153,54 @@ tpate <- function(formula_outcome,
                              pop_weights = pop_weights,
                              sims = sims)
     }
+    ipw_weights <- NULL
   }
 
   # 3. Doubly-Robust Estimators
   if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
-  if(est_type == "dr-ols") {
-    formula_proj <- update(formula_outcome, paste("~ . -", treatment))
-    tpate_fit <- aipw_ols(formula_outcome = formula_proj,
-                          formula_weights = formula_weights,
-                          treatment = treatment,
-                          exp_data = exp_data,
-                          pop_data = pop_data,
-                          weights_type = weights_type,
-                          weights_max = weights_max,
-                          pop_weights = pop_weights,
-                          boot = TRUE, sims = sims, boot_ind = boot_ind,
-                          numCores = numCores, seed = seed)
-  }else if(est_type == "dr-bart") {
-    formula_proj <- update(formula_outcome, paste("~ . -", treatment))
-    tpate_fit <- aipw_bart(formula_outcome = formula_proj,
-                           formula_weights = formula_weights,
-                           treatment = treatment,
-                           exp_data = exp_data,
-                           pop_data = pop_data,
-                           weights_type = weights_type,
-                           weights_max = weights_max,
-                           pop_weights = pop_weights,
-                           boot = TRUE, sims = sims, boot_ind = boot_ind,
-                           numCores = numCores, seed = seed)
-  }else if(est_type == "wls-proj") {
-    formula_proj <- update(formula_outcome, paste("~ . -", treatment))
-    tpate_fit <- wls_proj(formula_outcome = formula_proj,
-                          formula_weights = formula_weights,
-                          treatment = treatment,
-                          exp_data = exp_data,
-                          pop_data = pop_data,
-                          weights_type = weights_type,
-                          weights_max = weights_max,
-                          pop_weights = pop_weights,
-                          boot = TRUE, sims = sims, boot_ind = boot_ind,
-                          numCores = numCores, seed = seed)
+  if(est_type == "dr-ols" | est_type == "dr-bart" | est_type == "wls-proj"){
+    if(est_type == "dr-ols") {
+      formula_proj <- update(formula_outcome, paste("~ . -", treatment))
+      tpate_fit_b <- aipw_ols(formula_outcome = formula_proj,
+                              formula_weights = formula_weights,
+                              treatment = treatment,
+                              exp_data = exp_data,
+                              pop_data = pop_data,
+                              weights_type = weights_type,
+                              weights_max = weights_max,
+                              pop_weights = pop_weights,
+                              boot = TRUE, sims = sims, boot_ind = boot_ind,
+                              numCores = numCores, seed = seed)
+    }else if(est_type == "dr-bart") {
+      formula_proj <- update(formula_outcome, paste("~ . -", treatment))
+      tpate_fit_b <- aipw_bart(formula_outcome = formula_proj,
+                               formula_weights = formula_weights,
+                               treatment = treatment,
+                               exp_data = exp_data,
+                               pop_data = pop_data,
+                               weights_type = weights_type,
+                               weights_max = weights_max,
+                               pop_weights = pop_weights,
+                               boot = TRUE, sims = sims, boot_ind = boot_ind,
+                               numCores = numCores, seed = seed)
+    }else if(est_type == "wls-proj") {
+      formula_proj <- update(formula_outcome, paste("~ . -", treatment))
+      tpate_fit_b <- wls_proj(formula_outcome = formula_proj,
+                              formula_weights = formula_weights,
+                              treatment = treatment,
+                              exp_data = exp_data,
+                              pop_data = pop_data,
+                              weights_type = weights_type,
+                              weights_max = weights_max,
+                              pop_weights = pop_weights,
+                              boot = TRUE, sims = sims, boot_ind = boot_ind,
+                              numCores = numCores, seed = seed)
+    }
+    tpate_fit <- tpate_fit_b$out_m
+    ipw_weights <- tpate_fit_b$ipw_weights
   }
 
-  out <- list(sate = sate_fit, tpate = tpate_fit)
+  out <- list(sate = sate_fit, tpate = tpate_fit, ipw_weights = ipw_weights)
 
   return(out)
 }

@@ -22,12 +22,13 @@ wls_proj <- function(formula_outcome,
                                pop_weights = pop_weights)
   }
 
-  out <- gen_bootstrap(est = wls_proj_base, numCores = numCores, sims = sims,
-                       formula_outcome = formula_outcome, formula_weights = NULL,
-                       treatment = treatment, exp_data = exp_data, pop_data = pop_data,
-                       weights = ipw_weights, pop_weights = pop_weights,
-                       boot_ind = boot_ind, seed = seed)
+  out_m <- gen_bootstrap(est = wls_proj_base, numCores = numCores, sims = sims,
+                         formula_outcome = formula_outcome, formula_weights = NULL,
+                         treatment = treatment, exp_data = exp_data, pop_data = pop_data,
+                         weights = ipw_weights, pop_weights = pop_weights,
+                         boot_ind = boot_ind, seed = seed)
 
+  out <- list(out_m = out_m, ipw_weights = ipw_weights)
   return(out)
 }
 

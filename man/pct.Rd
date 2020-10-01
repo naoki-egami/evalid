@@ -14,7 +14,7 @@ pct(pvalue, threshold = NULL)
 \value{
 \code{pct} returns the following values.
  \itemize{
-   \item \code{pc}: A table of partial conjunction p-values
+   \item \code{pc}: A table of partial conjunction p-values. \code{threshold} indicates each threshold. \code{p_value} shows its corresponding partial conjunction p-value. \code{h_num} indicates the corresponding hypothesis, where each hypothesis is indexed by the original order in which they appear in the argument \code{pvalue}.
    \item \code{tpate}: Estimates of the T-PATE
  }
 }

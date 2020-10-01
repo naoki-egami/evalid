@@ -24,17 +24,18 @@ aipw_ols <- function(formula_outcome,
   ## Prepare
   formula_proj <- update(formula_outcome, paste("~ . -", treatment))
 
-  out <- gen_bootstrap(est = aipw_ols_base, numCores = numCores, sims = sims,
-                       formula_outcome = formula_proj,
-                       formula_weights = NULL,
-                       treatment = treatment,
-                       exp_data = exp_data,
-                       pop_data = pop_data,
-                       weights = ipw_weights,
-                       pop_weights = pop_weights,
-                       boot_ind = boot_ind,
-                       seed = seed)
+  out_m <- gen_bootstrap(est = aipw_ols_base, numCores = numCores, sims = sims,
+                         formula_outcome = formula_proj,
+                         formula_weights = NULL,
+                         treatment = treatment,
+                         exp_data = exp_data,
+                         pop_data = pop_data,
+                         weights = ipw_weights,
+                         pop_weights = pop_weights,
+                         boot_ind = boot_ind,
+                         seed = seed)
 
+  out <- list(out_m = out_m, ipw_weights = ipw_weights)
   return(out)
 }
 
