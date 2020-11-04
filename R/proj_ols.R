@@ -51,11 +51,14 @@ proj_ols <- function(formula_outcome, exp_data, pop_data,
     coef_t <- coef(lm_mod_1)
     coef_c <- coef(lm_mod_0)
 
-    fit_X <- paste0("~", as.character(formula(lm_mod_1))[3])
-    X_pop <- model.matrix(formula(fit_X), data = pop_data)
+    # fit_X <- paste0("~", as.character(formula(lm_mod_1))[3])
+    # X_pop <- model.matrix(formula(fit_X), data = pop_data)
+    #
+    # predict_t <- X_pop %*% as.vector(coef_t)
+    # predict_c <- X_pop %*% as.vector(coef_c)
 
-    predict_t <- X_pop %*% as.vector(coef_t)
-    predict_c <- X_pop %*% as.vector(coef_c)
+    predict_t <- predict(lm_mod_1, newdata = pop_data)
+    predict_c <- predict(lm_mod_0, newdata = pop_data)
 
     est <- mean(predict_t - predict_c, na.rm = TRUE)
 
