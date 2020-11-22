@@ -48,8 +48,8 @@ proj_ols <- function(formula_outcome, exp_data, pop_data,
     lm_mod_0 <- lm(formula_outcome,
                    data = exp_data[exp_data[, treatment] == 0, , drop = FALSE])
 
-    coef_t <- coef(lm_mod_1)
-    coef_c <- coef(lm_mod_0)
+    # coef_t <- coef(lm_mod_1)
+    # coef_c <- coef(lm_mod_0)
 
     # fit_X <- paste0("~", as.character(formula(lm_mod_1))[3])
     # X_pop <- model.matrix(formula(fit_X), data = pop_data)
