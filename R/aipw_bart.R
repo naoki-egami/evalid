@@ -6,7 +6,8 @@ aipw_bart <- function(formula_outcome,
                       weights_max,
                       pop_weights = NULL,
                       boot = TRUE, sims = 1000, boot_ind = NULL,
-                      numCores = 1, seed = 1234) {
+                      numCores = 1, seed = 1234,
+                      ...) {
 
   # We only support boot = TRUE
   if(weights_type == "logit"){
@@ -17,7 +18,8 @@ aipw_bart <- function(formula_outcome,
     ipw_weights <- weights_cal(formula_weights = formula_weights,
                                exp_data = exp_data, pop_data = pop_data,
                                calfun = "raking", weights_max = weights_max,
-                               pop_weights = pop_weights)
+                               pop_weights = pop_weights,
+                               ...)
   }
 
   ## Determine outcome variable name and covariates

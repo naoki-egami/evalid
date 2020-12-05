@@ -107,7 +107,7 @@ tpate <- function(formula_outcome,
       ipw_weights <- weights_cal(formula_weights = formula_weights,
                                  exp_data = exp_data, pop_data = pop_data,
                                  calfun = "raking", weights_max = weights_max,
-                                 pop_weights = pop_weights)
+                                 pop_weights = pop_weights, ...)
     }
 
     if(est_type == "ipw"){
@@ -170,7 +170,7 @@ tpate <- function(formula_outcome,
                               weights_max = weights_max,
                               pop_weights = pop_weights,
                               boot = TRUE, sims = sims, boot_ind = boot_ind,
-                              numCores = numCores, seed = seed)
+                              numCores = numCores, seed = seed, ...)
     }else if(est_type == "dr-bart") {
       formula_proj <- update(formula_outcome, paste("~ . -", treatment))
       tpate_fit_b <- aipw_bart(formula_outcome = formula_proj,
@@ -182,7 +182,7 @@ tpate <- function(formula_outcome,
                                weights_max = weights_max,
                                pop_weights = pop_weights,
                                boot = TRUE, sims = sims, boot_ind = boot_ind,
-                               numCores = numCores, seed = seed)
+                               numCores = numCores, seed = seed, ...)
     }else if(est_type == "wls-proj") {
       formula_proj <- update(formula_outcome, paste("~ . -", treatment))
       tpate_fit_b <- wls_proj(formula_outcome = formula_proj,
@@ -194,7 +194,7 @@ tpate <- function(formula_outcome,
                               weights_max = weights_max,
                               pop_weights = pop_weights,
                               boot = TRUE, sims = sims, boot_ind = boot_ind,
-                              numCores = numCores, seed = seed)
+                              numCores = numCores, seed = seed, ...)
     }
     tpate_fit <- tpate_fit_b$out_m
     ipw_weights <- tpate_fit_b$ipw_weights
