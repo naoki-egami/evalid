@@ -12,5 +12,11 @@ importFrom(foreach,"%do%")
 importFrom(foreach,"%dopar%")
 importFrom(foreach,foreach)
 importFrom(parallel,detectCores)
+importFrom(parallel,makeCluster)
+importFrom(parallel,stopCluster)
 importFrom(pbapply,pblapply)
 importFrom(pbmcapply,pbmclapply)
+importFrom("stats", "as.formula", "binomial", "coef", "confint",
+             "formula", "glm", "lm", "model.frame", "model.matrix",
+             "predict", "quantile", "sd", "terms", "update", "vcov",
+             "weighted.mean", "weights")

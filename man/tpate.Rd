@@ -17,9 +17,7 @@ tpate(
   id_cluster = NULL,
   sims = 1000,
   numCores = NULL,
-  seed = 1234,
-  compute_sate = TRUE,
-  ...
+  seed = 1234
 )
 }
 \arguments{
@@ -29,39 +27,37 @@ tpate(
 
 \item{treatment}{Name of the treatment variable}
 
-\item{exp_data}{Experimental Data}
+\item{exp_data}{Experimental data. This should be `data.frame`}
 
-\item{pop_data}{Population Data}
+\item{pop_data}{Population data. This should be `data.frame`}
 
-\item{est_type}{Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`, or `wls-proj`}
+\item{est_type}{Estimator Type. Should be one of the six types (`ipw`, `wls`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`). Weighting-based estimators are `ipw` and `wls`. Outcome-based estimators are `outcome-ols` and `outcome-bart.` Doubly-robust estimators are `dr-ols` and `dr-bart`.}
 
-\item{weights_type}{Weights Type; `logit`, `calibration`}
+\item{weights_type}{Weights Type. Should be one of the two types (`calibration`, `logit`). We recommend `calibration` for its stability in many applications.}
 
-\item{weights_max}{Default is `Inf`}
+\item{weights_max}{Maximum weights. Default is `Inf`.}
 
-\item{boot}{Whether you do bootstrap (`TRUE` or `FALSE`)}
+\item{boot}{Logical. Whether you do bootstrap (`TRUE` or `FALSE`).}
 
-\item{id_cluster}{Identifies for cluster bootstrap}
+\item{id_cluster}{Identifies for cluster bootstrap. The length should be the same as the number of rows of `exp_data`.}
 
-\item{sims}{The number of simulations}
+\item{sims}{The number of simulations.}
 
-\item{numCores}{The number of cores we use}
+\item{numCores}{The number of cores we use for parallel computing.}
 
 \item{seed}{seed (default = `1234`)}
-
-\item{compute_sate}{whether we compute SATE}
 }
 \value{
 \code{tpate} returns the following values.
  \itemize{
    \item \code{sate}: Estimates of the SATE
    \item \code{tpate}: Estimates of the T-PATE
-   \item \code{ipw_weights}: Estimated weights
+   \item \code{ipw_weights}: Estimated weights (when weighting-based or doubly robust estimators are used)
  }
 }
 \description{
 \code{tpate} implements the effect-generalization.
 }
 \references{
-Egami and Hartman. (2020+). Elements of External Validity: Framework, Design, and Analysis
+Egami and Hartman. (2022+). Elements of External Validity: Framework, Design, and Analysis.
 }

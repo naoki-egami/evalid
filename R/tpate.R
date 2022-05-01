@@ -2,24 +2,23 @@
 #' @param formula_outcome Formula for outcome model (should include treatment)
 #' @param formula_weights Formula for sampling weights
 #' @param treatment Name of the treatment variable
-#' @param exp_data Experimental Data
-#' @param pop_data Population Data
-#' @param est_type Estimator Type; `ipw`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`, or `wls-proj`
-#' @param weights_type Weights Type; `logit`, `calibration`
-#' @param weights_max Default is `Inf`
-#' @param boot Whether you do bootstrap (`TRUE` or `FALSE`)
-#' @param id_cluster Identifies for cluster bootstrap
-#' @param sims The number of simulations
-#' @param numCores The number of cores we use
+#' @param exp_data Experimental data. This should be `data.frame`
+#' @param pop_data Population data. This should be `data.frame`
+#' @param est_type Estimator Type. Should be one of the six types (`ipw`, `wls`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`). Weighting-based estimators are `ipw` and `wls`. Outcome-based estimators are `outcome-ols` and `outcome-bart.` Doubly-robust estimators are `dr-ols` and `dr-bart`.
+#' @param weights_type Weights Type. Should be one of the two types (`calibration`, `logit`). We recommend `calibration` for its stability in many applications.
+#' @param weights_max Maximum weights. Default is `Inf`.
+#' @param boot Logical. Whether you do bootstrap (`TRUE` or `FALSE`).
+#' @param id_cluster Identifies for cluster bootstrap. The length should be the same as the number of rows of `exp_data`.
+#' @param sims The number of simulations.
+#' @param numCores The number of cores we use for parallel computing.
 #' @param seed seed (default = `1234`)
-#' @param compute_sate whether we compute SATE
 #' @import estimatr
 #' @import bartCause
 #' @import survey
 #' @import tidyverse
 #' @importFrom pbmcapply pbmclapply
 #' @importFrom pbapply pblapply
-#' @importFrom parallel detectCores
+#' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach "%dopar%" "%do%" foreach
 #' @importFrom MASS mvrnorm
@@ -27,10 +26,10 @@
 #'  \itemize{
 #'    \item \code{sate}: Estimates of the SATE
 #'    \item \code{tpate}: Estimates of the T-PATE
-#'    \item \code{ipw_weights}: Estimated weights
+#'    \item \code{ipw_weights}: Estimated weights (when weighting-based or doubly robust estimators are used)
 #'  }
 #' @description \code{tpate} implements the effect-generalization.
-#' @references Egami and Hartman. (2020+). Elements of External Validity: Framework, Design, and Analysis
+#' @references Egami and Hartman. (2022+). Elements of External Validity: Framework, Design, and Analysis.
 #' @export
 
 
@@ -42,22 +41,19 @@ tpate <- function(formula_outcome,
                   est_type = "wls",
                   weights_type = "calibration", weights_max = Inf,
                   boot = TRUE, id_cluster = NULL,
-                  sims = 1000, numCores = NULL, seed = 1234,
-                  compute_sate = TRUE,
-                  ...) {
+                  sims = 1000, numCores = NULL, seed = 1234) {
 
-  ## Error handling that needs to be done:
-  ## - are covariates present in both population and exp data (unless using wLS)
-
-  # Check 1: Don't allow variable called, "weights"
-  # Check 2: Require researchers to transform variables beforehand
-
-  ## Note:
-  ## Need to take in outcome_var for weighted methods, right now assumes "Y"
-  ## Need to take in alpha level, right now assumes 0.05 (for the bart posteriors)
-
-  ## Naoki: I will work on Error Handling Later.
-  ## Naoki: I think bartCause is risky to use. We will change it later.
+  compute_sate <- TRUE
+  if(("data.frame" %in% class(exp_data)) == FALSE){
+    stop("'exp_data' should be 'data.frame'")
+  }else{
+    class(exp_data) <- "data.frame"
+  }
+  if(("data.frame" %in% class(pop_data)) == FALSE){
+    stop("'pop_data' should be 'data.frame'")
+  }else{
+    class(pop_data) <- "data.frame"
+  }
 
   # ###################
   # Setup
@@ -107,7 +103,7 @@ tpate <- function(formula_outcome,
       ipw_weights <- weights_cal(formula_weights = formula_weights,
                                  exp_data = exp_data, pop_data = pop_data,
                                  calfun = "raking", weights_max = weights_max,
-                                 pop_weights = pop_weights, ...)
+                                 pop_weights = pop_weights)
     }
 
     if(est_type == "ipw"){
@@ -158,7 +154,7 @@ tpate <- function(formula_outcome,
 
   # 3. Doubly-Robust Estimators
   if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
-  if(est_type == "dr-ols" | est_type == "dr-bart" | est_type == "wls-proj"){
+  if(est_type == "dr-ols" | est_type == "dr-bart"){
     if(est_type == "dr-ols") {
       formula_proj <- update(formula_outcome, paste("~ . -", treatment))
       tpate_fit_b <- aipw_ols(formula_outcome = formula_proj,
@@ -170,7 +166,7 @@ tpate <- function(formula_outcome,
                               weights_max = weights_max,
                               pop_weights = pop_weights,
                               boot = TRUE, sims = sims, boot_ind = boot_ind,
-                              numCores = numCores, seed = seed, ...)
+                              numCores = numCores, seed = seed)
     }else if(est_type == "dr-bart") {
       formula_proj <- update(formula_outcome, paste("~ . -", treatment))
       tpate_fit_b <- aipw_bart(formula_outcome = formula_proj,
@@ -182,25 +178,15 @@ tpate <- function(formula_outcome,
                                weights_max = weights_max,
                                pop_weights = pop_weights,
                                boot = TRUE, sims = sims, boot_ind = boot_ind,
-                               numCores = numCores, seed = seed, ...)
-    }else if(est_type == "wls-proj") {
-      formula_proj <- update(formula_outcome, paste("~ . -", treatment))
-      tpate_fit_b <- wls_proj(formula_outcome = formula_proj,
-                              formula_weights = formula_weights,
-                              treatment = treatment,
-                              exp_data = exp_data,
-                              pop_data = pop_data,
-                              weights_type = weights_type,
-                              weights_max = weights_max,
-                              pop_weights = pop_weights,
-                              boot = TRUE, sims = sims, boot_ind = boot_ind,
-                              numCores = numCores, seed = seed, ...)
+                               numCores = numCores, seed = seed)
     }
     tpate_fit <- tpate_fit_b$out_m
     ipw_weights <- tpate_fit_b$ipw_weights
   }
 
-  out <- list(sate = sate_fit, tpate = tpate_fit, ipw_weights = ipw_weights)
+  out <- list(sate = sate_fit,
+              tpate = tpate_fit,
+              ipw_weights = ipw_weights)
 
   return(out)
 }

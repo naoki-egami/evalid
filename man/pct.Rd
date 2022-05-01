@@ -7,7 +7,7 @@
 pct(pvalue, threshold = NULL)
 }
 \arguments{
-\item{pvalue}{a vector of one-sided p-values}
+\item{pvalue}{A vector of one-sided p-values}
 
 \item{threshold}{A threshold for the partial conjunction test. If NULL, we compute partial conjunction p-values for all thresholds. Default is NULL.}
 }
@@ -15,12 +15,11 @@ pct(pvalue, threshold = NULL)
 \code{pct} returns the following values.
  \itemize{
    \item \code{pc}: A table of partial conjunction p-values. \code{threshold} indicates each threshold. \code{p_value} shows its corresponding partial conjunction p-value. \code{h_num} indicates the corresponding hypothesis, where each hypothesis is indexed by the original order in which they appear in the argument \code{pvalue}.
-   \item \code{tpate}: Estimates of the T-PATE
  }
 }
 \description{
-\code{pct} implements the sign-generalization.
+\code{pct} implements the sign-generalization test.
 }
 \references{
-Egami and Hartman. (2020+). Elements of External Validity: Framework, Design, and Analysis
+Egami and Hartman. (2022+). Elements of External Validity: Framework, Design, and Analysis.
 }

@@ -1,4 +1,4 @@
-## OLS Projection
+## Outcome-based Estimator with OLS
 proj_ols <- function(formula_outcome, exp_data, pop_data,
                      treatment,
                      pop_weights = NULL,
@@ -21,8 +21,8 @@ proj_ols <- function(formula_outcome, exp_data, pop_data,
 
       X_pop <- model.matrix(formula(fit_X), data = pop_data)
 
-      predict_t <- X_pop %*% t(coef_t)
-      predict_c <- X_pop %*% t(coef_c)
+      predict_t <- X_pop %*% as.vector(coef_t)
+      predict_c <- X_pop %*% as.vector(coef_c)
 
       pate_sim <- apply(predict_t - predict_c, 2, weighted.mean, w = pop_weights)
       est <- mean(pate_sim, na.rm = TRUE)

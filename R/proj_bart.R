@@ -1,3 +1,4 @@
+## Outcome-based Estimator with BART
 proj_bart <- function(formula_outcome,
                       treatment,
                       exp_data, pop_data,

@@ -1,18 +1,18 @@
 Package: evalid
 Type: Package
 Title: Methodologies for Improving External Validity of Randomized Experiments
-Version: 0.1.0
+Version: 1.0.0
 Author: Naoki Egami and Erin Hartman 
 Maintainer: Naoki Egami <naoki.egami@columbia.edu>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Provides three classes of estimators (`tpate`) for effec-generalization and a sign-generalization test (`pct`) to conduct sign-generalization. Details of the methods are explained in Egami and Hartman (2022+).
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Depends:
     R (>= 3.5.0)
 Imports:
+    MASS,
     pbmcapply,
     pbapply,
     doParallel,

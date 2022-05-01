@@ -1,6 +1,4 @@
-### Helper function for creating targets from auxiliary information and formula for
-
-### calibration
+# Helper function for creating targets from auxiliary information and formula for calibration
 create_targets <- function (target_design, target_formula) {
   target_mf <- model.frame(target_formula, model.frame(target_design))
   target_mm <- model.matrix(target_formula, target_mf)
@@ -8,11 +6,10 @@ create_targets <- function (target_design, target_formula) {
   colSums(target_mm * wts) / sum(wts)
 }
 
-## Construct calibration weights
+# Construct calibration weights
 weights_cal <- function(formula_weights, exp_data, pop_data,
                         calfun = "raking", weights_max = Inf,
-                        pop_weights = NULL,
-                        ...) {
+                        pop_weights = NULL) {
 
   if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
 
@@ -33,8 +30,7 @@ weights_cal <- function(formula_weights, exp_data, pop_data,
   PATE_cal <- calibrate(design = sample_surv,
                         formula = formula,
                         population = targets,
-                        calfun = calfun,
-                        ...)
+                        calfun = calfun)
 
   ## Trim weights
   if(is.finite(weights_max)) {

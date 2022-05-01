@@ -1,6 +1,6 @@
 ## Calculate logit weights
 weights_logit <- function(formula_weights, exp_data, pop_data, weights_max = Inf,
-                          pop_weights = NULL, ...) {
+                          pop_weights = NULL) {
 
   ## gather the covariate terms
   covariates <- labels(terms(formula_weights))
@@ -20,7 +20,7 @@ weights_logit <- function(formula_weights, exp_data, pop_data, weights_max = Inf
 
   ## get weights
   logit_fit <- glm(formula_logit, data = full_data, family = binomial(link = "logit"),
-                   weights = pop_weights_logit)
+                   weights = pop_weights)
   p_expt  <- predict(logit_fit, type = "response")
   weights <- 1 / p_expt * (1 - p_expt) / mean(full_data$S == 0)
   weights_sample <- weights[full_data$S == 1]

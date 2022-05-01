@@ -1,8 +1,4 @@
 #' Weighted Least Squares
-#' @param formula_outcome Formula for outcome model
-#' @param treatment Name of the treatment variable
-#' @param exp_data Experimental Data
-#' @param weights Weights should be a vector of numeric values with the same length with `exp_data`
 
 wls <- function(formula_outcome,
                 treatment, exp_data,

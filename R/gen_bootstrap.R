@@ -1,5 +1,4 @@
 #' Generic Bootstrap function
-
 gen_bootstrap <- function(est, numCores, sims = 1000,
                           formula_outcome,
                           formula_weights,
@@ -94,13 +93,6 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
   return(out)
 }
 
-
-#' Generate Bootstrap data
-#' @param x A
-#' @param seed A
-#' @param data A
-#' @param boot_ind A
-
 boot_data <- function(x, seed, data, boot_ind){
 
   # boot_ind should be the same length as data
@@ -108,13 +100,6 @@ boot_data <- function(x, seed, data, boot_ind){
   # set seed
   seed.b <- 1000*x + seed
   set.seed(seed.b)
-
-  # Stratified Bootstrap (bootstrap within strata)
-  # uniq_strata <- unique(boot_ind)
-  # pos_strata <- lapply(uniq_strata, function(x) which(x == boot_ind))
-  # boot_which <- lapply(pos_strata, function(x) sample(x, size = length(x), replace = TRUE))
-  # # data_b <- data[unlist(boot_which), , drop = FALSE]
-  # boot_use <- unlist(boot_which)
 
   if(is.null(boot_ind) == FALSE){
     # Block Bootstrap (within each treatment)

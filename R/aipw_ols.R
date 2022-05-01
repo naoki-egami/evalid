@@ -7,8 +7,7 @@ aipw_ols <- function(formula_outcome,
                      weights_max,
                      pop_weights = NULL,
                      boot = TRUE, sims = 1000, boot_ind = NULL,
-                     numCores = 1, seed = 1234,
-                     ...){
+                     numCores = 1, seed = 1234){
 
   # We only support boot = TRUE
   if(weights_type == "logit"){
@@ -19,8 +18,7 @@ aipw_ols <- function(formula_outcome,
     ipw_weights <- weights_cal(formula_weights = formula_weights,
                                exp_data = exp_data, pop_data = pop_data,
                                calfun = "raking", weights_max = weights_max,
-                               pop_weights = pop_weights,
-                               ...)
+                               pop_weights = pop_weights)
   }
 
   ## Prepare
@@ -84,57 +82,3 @@ aipw_ols_base <- function(x,
 
   return(out)
 }
-
-
-
-
-# # Augumented IPW Estimator with OLS
-# aipw_ols_base <- function(formula_outcome, treatment,
-#                           formula_weights,
-#                           model, weights_type = "calibration",
-#                           exp_data,
-#                           pop_data, weight_max,
-#                           pop_weights = NULL, ...){
-#
-#
-#
-#   if(weights_type == "logit"){
-#     ipw_weights <- weights_logit(formula_weights = formula_weights,
-#                                  exp_data = exp_data, pop_data = pop_data,
-#                                  weight_max = weight_max, pop_weights = pop_weights)
-#   }else if(weights_type == "calibration"){
-#     ipw_weights <- weights_cal(formula_weights = formula_weights,
-#                                exp_data = exp_data, pop_data = pop_data,
-#                                calfun = "raking", weight_max = weight_max,
-#                                pop_weights = pop_weights)
-#   }
-#
-#   ## do ols projection, get models back
-#   formula_proj <- update(formula_outcome, paste("~ . -", treatment))
-#   proj <- proj_ols(formula_outcome = formula_proj,
-#                    treatment = treatment,
-#                    exp_data = exp_data,
-#                    pop_data = pop_data,
-#                    pop_weights = pop_weights,
-#                    boot = FALSE,
-#                    sims = 2, boot_ind = NULL,
-#                    numCores = 1, seed = 1234)
-#
-#   Y <- exp_data[, all.vars(formula_outcome)[1]]
-#   treat <- exp_data[, treatment]
-#
-#   ## get residuals
-#   exp_data$resid <- Y -
-#     ifelse(treat == 1,
-#            ## if true project model Y1
-#            predict(proj$lm_mod_1, newdata = exp_data),
-#            ## if false, project model Y0
-#            predict(proj$lm_mod_0, newdata = exp_data))
-#   ## add wls on residuals to projection estimate
-#   formula_res <- update(resid ~ 1, paste("~ . +", treatment))
-#   res_fit <- lm_robust(formula_res, data = exp_data, weights = ipw_weights)
-#   out <- proj$est + coef(res_fit)[treatment]
-#
-#   return(out)
-# }
-
