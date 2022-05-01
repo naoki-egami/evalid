@@ -1,10 +1,10 @@
 Package: evalid
 Type: Package
-Title: Methodologies for Improving External Validity of Randomized Experiments
+Title: Methods for Improving External Validity of Randomized Experiments
 Version: 1.0.0
 Author: Naoki Egami and Erin Hartman 
 Maintainer: Naoki Egami <naoki.egami@columbia.edu>
-Description: Provides three classes of estimators (`tpate`) for effec-generalization and a sign-generalization test (`pct`) to conduct sign-generalization. Details of the methods are explained in Egami and Hartman (2022+).
+Description: Provides three classes of estimators (`tpate`) for effec-generalization and a partial conjunction test (`pct`) to conduct sign-generalization. Details of the methods are explained in Egami and Hartman (2022+).
 License: GPL-2
 Encoding: UTF-8
 LazyData: true

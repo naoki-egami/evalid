@@ -89,7 +89,8 @@ gen_bootstrap <- function(est, numCores, sims = 1000,
   # count the number of NAs
   num_NA <- sum(is.na(estimate))
 
-  out <- list(est = est, se = se, ci_lower = ci_lower, ci_upper = ci_upper, num_NA = num_NA)
+  # out <- list(est = est, se = se, ci_lower = ci_lower, ci_upper = ci_upper, num_NA = num_NA)
+  out <- list(est = est, se = se, ci_lower = ci_lower, ci_upper = ci_upper)
   return(out)
 }
 

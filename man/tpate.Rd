@@ -5,9 +5,10 @@
 \title{Estimating the Target Population Average Treatment Effect (TPATE)}
 \usage{
 tpate(
-  formula_outcome,
-  formula_weights,
+  outcome,
   treatment,
+  covariates,
+  covariates_exp = NULL,
   exp_data,
   pop_data,
   est_type = "wls",
@@ -15,17 +16,20 @@ tpate(
   weights_max = Inf,
   boot = TRUE,
   id_cluster = NULL,
-  sims = 1000,
+  sims = 500,
   numCores = NULL,
-  seed = 1234
+  seed = 1234,
+  compute_sate = FALSE
 )
 }
 \arguments{
-\item{formula_outcome}{Formula for outcome model (should include treatment)}
-
-\item{formula_weights}{Formula for sampling weights}
+\item{outcome}{Mame of the outcome variable}
 
 \item{treatment}{Name of the treatment variable}
+
+\item{covariates}{Names of covariates we adjust for.}
+
+\item{covariates_exp}{(Optional) Names of covariates measured only in the experimental data. These covariates are used only in `wls`}
 
 \item{exp_data}{Experimental data. This should be `data.frame`}
 
@@ -37,15 +41,17 @@ tpate(
 
 \item{weights_max}{Maximum weights. Default is `Inf`.}
 
-\item{boot}{Logical. Whether you do bootstrap (`TRUE` or `FALSE`).}
+\item{boot}{Logical. Whether we use bootstrap (`TRUE` or `FALSE`). For doubly robust estimators (`dr_ols` and `dr-bart`), we always use bootstrap (`boot = TRUE`).}
 
 \item{id_cluster}{Identifies for cluster bootstrap. The length should be the same as the number of rows of `exp_data`.}
 
-\item{sims}{The number of simulations.}
+\item{sims}{The number of bootstrap replications (when `boot = TRUE)`. The number of quasi-bayesian posterior samples (when `boot = FALSE`).}
 
 \item{numCores}{The number of cores we use for parallel computing.}
 
 \item{seed}{seed (default = `1234`)}
+
+\item{compute_sate}{Logical. Whether we compute the SATE within the package.}
 }
 \value{
 \code{tpate} returns the following values.

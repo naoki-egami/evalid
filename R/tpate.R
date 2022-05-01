@@ -1,17 +1,19 @@
 #' Estimating the Target Population Average Treatment Effect (TPATE)
-#' @param formula_outcome Formula for outcome model (should include treatment)
-#' @param formula_weights Formula for sampling weights
+#' @param outcome Mame of the outcome variable
 #' @param treatment Name of the treatment variable
+#' @param covariates Names of covariates we adjust for.
+#' @param covariates_exp (Optional) Names of covariates measured only in the experimental data. These covariates are used only in `wls`
 #' @param exp_data Experimental data. This should be `data.frame`
 #' @param pop_data Population data. This should be `data.frame`
 #' @param est_type Estimator Type. Should be one of the six types (`ipw`, `wls`, `outcome-ols`, `outcome-bart`, `dr-ols`, `dr-bart`). Weighting-based estimators are `ipw` and `wls`. Outcome-based estimators are `outcome-ols` and `outcome-bart.` Doubly-robust estimators are `dr-ols` and `dr-bart`.
 #' @param weights_type Weights Type. Should be one of the two types (`calibration`, `logit`). We recommend `calibration` for its stability in many applications.
 #' @param weights_max Maximum weights. Default is `Inf`.
-#' @param boot Logical. Whether you do bootstrap (`TRUE` or `FALSE`).
+#' @param boot Logical. Whether we use bootstrap (`TRUE` or `FALSE`). For doubly robust estimators (`dr_ols` and `dr-bart`), we always use bootstrap (`boot = TRUE`).
 #' @param id_cluster Identifies for cluster bootstrap. The length should be the same as the number of rows of `exp_data`.
-#' @param sims The number of simulations.
+#' @param sims The number of bootstrap replications (when `boot = TRUE)`. The number of quasi-bayesian posterior samples (when `boot = FALSE`).
 #' @param numCores The number of cores we use for parallel computing.
 #' @param seed seed (default = `1234`)
+#' @param compute_sate Logical. Whether we compute the SATE within the package.
 #' @import estimatr
 #' @import bartCause
 #' @import survey
@@ -33,17 +35,22 @@
 #' @export
 
 
-tpate <- function(formula_outcome,
-                  formula_weights,
+tpate <- function(outcome,
                   treatment,
+                  covariates,
+                  covariates_exp = NULL,
                   exp_data,
                   pop_data,
                   est_type = "wls",
-                  weights_type = "calibration", weights_max = Inf,
+                  weights_type = "calibration",
+                  weights_max = Inf,
                   boot = TRUE, id_cluster = NULL,
-                  sims = 1000, numCores = NULL, seed = 1234) {
+                  sims = 500, numCores = NULL, seed = 1234,
+                  compute_sate = FALSE) {
 
-  compute_sate <- TRUE
+  # Housekeeping
+
+  ## data.frame
   if(("data.frame" %in% class(exp_data)) == FALSE){
     stop("'exp_data' should be 'data.frame'")
   }else{
@@ -55,9 +62,17 @@ tpate <- function(formula_outcome,
     class(pop_data) <- "data.frame"
   }
 
+  ## est_type
+  if((est_type %in% c("ipw","wls", "outcome-ols", "outcome-bart", "dr-ols", "dr-bart")) == FALSE){
+    stop("`est_type` should be one of `ipw`, `wls`, `outcome-ols`, `outcome-bart`, `dr-ols`, or `dr-bart`.")
+  }
+
   # ###################
   # Setup
   # ###################
+  formula_outcome <- as.formula(paste0(outcome, "~", paste(c(treatment, covariates), collapse = "+")))
+  formula_weights <- as.formula(paste0("~", paste(c(covariates), collapse = "+")))
+
   if(is.null(numCores) == FALSE){
     if(numCores >= detectCores()) numCores <- detectCores() - 1
   }
@@ -67,9 +82,6 @@ tpate <- function(formula_outcome,
   ## If pop_weights are null, assign as all 1
   pop_weights <- NULL
   if(is.null(pop_weights)) pop_weights <- rep(1, nrow(pop_data))
-
-  # Keep names of outcome variable
-  outcome <- all.vars(formula_outcome)[1]
 
   # prepare for Bootstrap
   # For now, I assume that we only do the complete randomization.
@@ -111,13 +123,13 @@ tpate <- function(formula_outcome,
       formula_weighting <- as.formula(paste0(outcome, "~", paste0(treatment, collapse = " + ")))
     }else if(est_type == "wls"){
       # 1.2 wls (est_type = "wls")
-      # We are not currently accepting interactions between X and treatments
-      formula_weighting <- update(formula_outcome, paste("~ . +", treatment))
+      formula_weighting <- as.formula(paste0(outcome, "~", paste(c(treatment, covariates, covariates_exp), collapse = "+")))
     }
     tpate_fit <- wls(formula_outcome = formula_weighting,
                      treatment = treatment,
                      exp_data = exp_data,
-                     weights = ipw_weights, pop_weights = pop_weights,
+                     weights = ipw_weights,
+                     pop_weights = pop_weights,
                      boot = boot,
                      sims = sims, boot_ind = boot_ind,
                      numCores = numCores, seed = seed)

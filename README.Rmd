@@ -1,0 +1,194 @@
+---
+title: "evalid: Methods for Improving External Validity of Randomized Experiments"
+output: 
+  md_document:
+    variant: markdown_github
+---
+
+# evalid: Methods for Improving External Validity of Randomized Experiments
+
+**Description:** 
+
+R package `evalid` provides two key functions. (1) `tpate`: three classes of estimators for the target population average treatment effect (T-PATE) to conduct effect-generalization. (2) `pct`: a partial conjunction test to conduct a sign-generalization test. Detailes of the methods are described in Egami and Hartman (2022+).
+
+**Authors:** 
+
+- [Naoki Egami](https://naokiegami.com/)
+- [Erin Hartman](https://erinhartman.com/)
+
+**References:** 
+
+ - Egami and Hartman. (2022+). [Elements of External Validity: Framework, Design, and Analysis.](https://naokiegami.com/paper/external_full.pdf) Conditionally accepted at *American Political Science Review*
+ 
+## Installation Instructions
+You can install the most recent development version using the `devtools` package. First you have to install `devtools` using the following code. Note that you only have to do this once:
+```{r eval=FALSE} 
+if(!require(devtools)) install.packages("devtools")
+```   
+Then, load `devtools` and use the function `install_github()` to install `factorEx`:
+
+```{r eval=FALSE}
+library(devtools)
+install_github("naoki-egami/evalid", dependencies = TRUE)
+```  
+
+## Examples
+
+- **Effect-Generalization**
+    - Weighting-based Estimator: `est_type` is `ipw` or `wls`
+    - Outcome-based Estimator: `est_type` is `outcome-ols` or `outcome-bart`
+    - Doubly Robust Estimator: `est_type` is `dr-ols` or `dr-bart`
+
+- **Sign-Generalization**
+    - How to use `pct()` function
+
+## Effect-Generalization via `tpate()`
+The goal is to estimate the target population average treatment effect (T-PATE) in the target population data.
+
+### Prepare data
+When using marginal distributions, `target_dist` should be a list and each element should have a factor name. Within each list, a `numeric` vector should have the same level names as those in `data`.
+```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+## Load the package and data
+library(evalid)
+data("BroockmanKalla")
+
+exp_data <- BroockmanKalla$exp_data # experimental data
+pop_data <- BroockmanKalla$pop_data # target population data
+
+# covariates measured in both experimental and population data
+covariates <- c("vf_female", "vf_black", "vf_white", 
+                "religious_t0_factor_More_than_once_a_week", "religious_t0_factor_Never", 
+                "religious_t0_factor_Once_a_week", "religious_t0_factor_Once_or_twice_a_month", 
+                "ideology_t0_factor_Conservative", "ideology_t0_factor_Liberal",
+                "ideology_t0_factor_Moderate", "ideology_t0_factor_Very_conservative", 
+                "pid_t0_factor_Independent", "pid_t0_factor_Lean_Democrat", 
+                "pid_t0_factor_Lean_Republican", "pid_t0_factor_Not_very_strong_Democrat",
+                "pid_t0_factor_Not_very_strong_Republican", "pid_t0_factor_Strong_Democrat", 
+                "vf_age_bucket_a_18to34", "vf_age_bucket_b_35to49", "vf_age_bucket_c_50to64")
+```
+
+### Weighting-based Estimators
+We can estimate the pAMCE with `design_pAMCE` with `target_type = "marginal"`. Use `factor_name` to specify for which factors we estimate the pAMCE. 
+```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+## IPW 
+ipw <- tpate(outcome = "trans.tolerance.dv.t1",
+             treatment = "treat_ind", 
+             covariates = covariates, 
+             exp_data = exp_data, 
+             pop_data = pop_data,
+             id_cluster = exp_data$cluster, # cluster-standard errors 
+             est_type = "ipw", # type of estimator 
+             weights_max = 10) 
+
+unlist(ipw$tpate)
+
+## Weighted Least Squares (can include covariates measured only in the experiment)
+covariates_exp <- c("miami_trans_law_t0", "miami_trans_law2_t0",
+                    "therm_trans_t0", "gender_norms_sexchange_t0", "gender_norms_moral_t0", "gender_norms_abnormal_t0",
+                    "ssm_t0", "therm_obama_t0", "therm_gay_t0", "vf_democrat",
+                    "exposure_gay_t0", "exposure_trans_t0", "sdo_scale",
+                    "gender_norm_daugher_t0", "gender_norm_looks_t0",
+                    "gender_norm_rights_t0", "therm_afams_t0", "vf_hispanic",
+                    "survey_language_es","cluster_level_t0_scale_mean")
+wls <- tpate(outcome = "trans.tolerance.dv.t1",
+             treatment = "treat_ind", 
+             covariates = covariates, # covariates measured in both the experimental and population data
+             covariates_exp = covariates_exp, # covariates measured only in the experimental data
+             exp_data = exp_data, 
+             pop_data = pop_data,
+             id_cluster = exp_data$cluster, # cluster-standard errors 
+             est_type = "wls", # type of estimator 
+             weights_max = 10) 
+unlist(wls$tpate)
+```
+
+### Outcome-based Estimators
+We can estimate the pAMCE with `design_pAMCE` with `target_type = "marginal"`. Use `factor_name` to specify for which factors we estimate the pAMCE. 
+```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+## OLS Outcome-based Estimator 
+outcome_ols <- tpate(outcome = "trans.tolerance.dv.t1",
+                     treatment = "treat_ind", 
+                     covariates = covariates, # covariates measured in both the experimental and population data
+                     exp_data = exp_data, 
+                     pop_data = pop_data,
+                     id_cluster = exp_data$cluster, # cluster-standard errors 
+                     est_type = "outcome-ols") # type of estimator 
+unlist(outcome_ols$tpate)
+
+## BART Outcome-based Estimator 
+outcome_bart <- tpate(outcome = "trans.tolerance.dv.t1",
+                     treatment = "treat_ind", 
+                     covariates = covariates, # covariates measured in both the experimental and population data
+                     exp_data = exp_data, 
+                     pop_data = pop_data,
+                     id_cluster = exp_data$cluster, # cluster-standard errors 
+                     est_type = "outcome-bart") # type of estimator
+unlist(outcome_bart$tpate)
+```
+
+### Doubly Robust Estimators
+We can estimate the pAMCE with `design_pAMCE` with `target_type = "marginal"`. Use `factor_name` to specify for which factors we estimate the pAMCE. 
+```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+## Doubley Robust Estimator (outcome model is OLS)
+dr_ols <- tpate(outcome = "trans.tolerance.dv.t1",
+             treatment = "treat_ind", 
+             covariates = covariates, 
+             exp_data = exp_data, 
+             pop_data = pop_data,
+             id_cluster = exp_data$cluster, # cluster-standard errors 
+             est_type = "dr-ols", # type of estimator 
+             weights_max = 10) 
+unlist(dr_ols$tpate)
+
+## Doubley Robust Estimator (outcome model is BART)
+dr_bart <- tpate(outcome = "trans.tolerance.dv.t1",
+             treatment = "treat_ind", 
+             covariates = covariates, 
+             exp_data = exp_data, 
+             pop_data = pop_data,
+             id_cluster = exp_data$cluster, # cluster-standard errors 
+             est_type = "dr-bart", # type of estimator 
+             weights_max = 10) 
+unlist(dr_bart$tpate)
+```
+
+## Sign-Generalization via `pct()`
+
+### When a substantive theory predicts a positive causal effect (i.e., null hypothesis: a causal effect is less than or equal to zero) 
+```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(estimatr)
+data("Bisgaard")
+
+## Opposition Supporters (The Bisgaard theory predicts positive effects for this subgroup)
+opp_data <- Bisgaard$opp_data  ## cleaned data for 12 different variations 
+
+## Compute one-sided p-values for each variation
+pv_opp <- c()
+for(i in 1:12){
+  data_variation <- opp_data[[i]]
+  fit_variation <- lm_robust(outcome ~ treatment, data = data_variation)  # compute the causal effect for each variation
+  z <- summary(fit_variation)$coef["treatment", "Estimate"]/summary(fit_variation)$coef["treatment", "Std. Error"]
+  pv_opp[i] <- 1 - pnorm(z)  # one-sided p-value for positive effects
+}
+
+## Partial Conjunction Test
+pct(pv_opp)
+```
+
+### When a substantive theory predicts a negative causal effect (i.e., null hypothesis: a causal effect is larger than or equal to zero) 
+```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+## Government Supporters (The Bisgaard theory predicts negative effects for this subgroup)
+gov_data <- Bisgaard$gov_data  ## cleaned data for 12 different variations 
+
+## Compute one-sided p-values for each variation
+pv_gov <- c()
+for(i in 1:12){
+  data_variation <- gov_data[[i]]
+  fit_variation <- lm_robust(outcome ~ treatment, data = data_variation)  # compute the causal effect for each variation
+  z <- summary(fit_variation)$coef["treatment", "Estimate"]/summary(fit_variation)$coef["treatment", "Std. Error"]
+  pv_gov[i] <- pnorm(z)  # one-sided p-value for negative effects
+}
+
+## Partial Conjunction Test
+pct(pv_gov)
+```
