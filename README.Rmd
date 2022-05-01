@@ -9,7 +9,7 @@ output:
 
 **Description:** 
 
-R package `evalid` provides two key functions. (1) `tpate`: three classes of estimators for the target population average treatment effect (T-PATE) to conduct effect-generalization. (2) `pct`: a partial conjunction test to conduct a sign-generalization test. Detailes of the methods are described in Egami and Hartman (2022+).
+R package `evalid` provides two key functions. (1) `tpate()`: three classes of estimators for the target population average treatment effect (T-PATE) to conduct effect-generalization. (2) `pct()`: a partial conjunction test to conduct a sign-generalization test. Details of the methods are described in Egami and Hartman (2022+).
 
 **Authors:** 
 
@@ -25,28 +25,29 @@ You can install the most recent development version using the `devtools` package
 ```{r eval=FALSE} 
 if(!require(devtools)) install.packages("devtools")
 ```   
-Then, load `devtools` and use the function `install_github()` to install `factorEx`:
-
+Then, load `devtools` and use the function `install_github()` to install `evalid`:
 ```{r eval=FALSE}
 library(devtools)
 install_github("naoki-egami/evalid", dependencies = TRUE)
 ```  
 
-## Examples
+## Overview
+Please read Section "The Proposed Approach toward External Validity: Outline" in Egami and Hartman (2022+) for the overview of effect- and sign-generalization.
 
 - **Effect-Generalization**
-    - Weighting-based Estimator: `est_type` is `ipw` or `wls`
-    - Outcome-based Estimator: `est_type` is `outcome-ols` or `outcome-bart`
-    - Doubly Robust Estimator: `est_type` is `dr-ols` or `dr-bart`
+    - Weighting-based Estimator: IPW estimator (`ipw`) or Weighted Least Squares (`wls`)
+    - Outcome-based Estimator: OLS-based estimator (`outcome-ols`) or BART-based estimator (`outcome-bart`)
+    - Doubly Robust Estimator: Doubly robust estimator with OLS-based outcome model (`dr-ols`) or Doubly robust estimator with BART-based outcome model (`dr-bart`)
 
 - **Sign-Generalization**
     - How to use `pct()` function
 
 ## Effect-Generalization via `tpate()`
-The goal is to estimate the target population average treatment effect (T-PATE) in the target population data.
+The goal is to estimate the target population average treatment effect (T-PATE) in the target population data. Please read Section "Effect-Generalization" in Egami and Hartman (2022+) for details and practical recommendations for effect-generalization. We use Broockman and Kalla (2018) as an example. See Section "Empirical Applications" in Egami and Hartman (2022+) as well.
 
 ### Prepare data
-When using marginal distributions, `target_dist` should be a list and each element should have a factor name. Within each list, a `numeric` vector should have the same level names as those in `data`.
+We need two data sets. (1) `exp_data`: the experimental data that includes outcome, treatment, and covariates we adjust for. (2) `pop_data`: the target population data that includes covariates we adjust for. 
+
 ```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 ## Load the package and data
 library(evalid)
@@ -68,7 +69,7 @@ covariates <- c("vf_female", "vf_black", "vf_white",
 ```
 
 ### Weighting-based Estimators
-We can estimate the pAMCE with `design_pAMCE` with `target_type = "marginal"`. Use `factor_name` to specify for which factors we estimate the pAMCE. 
+Weighting-based estimators (`ipw` and `wls`) estimate the T-PATE via estimating weights that balance covariates in the experimental data and population data. In addition to the ignorability of sampling and treatment effect heterogeneity, this class of estimators assumes weights are correctly modeled. Importantly, weighted least squares estimators (`wls`) can incorporate covariates measured only in the experiment to increase efficiency (using argument `covariates_exp`). 
 ```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 ## IPW 
 ipw <- tpate(outcome = "trans.tolerance.dv.t1",
@@ -103,7 +104,7 @@ unlist(wls$tpate)
 ```
 
 ### Outcome-based Estimators
-We can estimate the pAMCE with `design_pAMCE` with `target_type = "marginal"`. Use `factor_name` to specify for which factors we estimate the pAMCE. 
+Outcome-based estimators (`outcome-ols` and `outcome-bart`) estimate the T-PATE via modeling outcome regression. In addition to the ignorability of sampling and treatment effect heterogeneity, this class of estimators assumes outcome models are correctly specified.
 ```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 ## OLS Outcome-based Estimator 
 outcome_ols <- tpate(outcome = "trans.tolerance.dv.t1",
@@ -127,9 +128,9 @@ unlist(outcome_bart$tpate)
 ```
 
 ### Doubly Robust Estimators
-We can estimate the pAMCE with `design_pAMCE` with `target_type = "marginal"`. Use `factor_name` to specify for which factors we estimate the pAMCE. 
+Doubly robust estimators (`dr-ols` and `dr-bart`) estimate the T-PATE via modeling both weights and outcome regression. Doubly robust estimators are consistent to the T-PATE if one of the two (weights or an outcome model) is correctly specified. Note that this estimator also makes the ignorability of sampling and treatment effect heterogeneity assumption for causal identification.
 ```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
-## Doubley Robust Estimator (outcome model is OLS)
+## Doubly Robust Estimator (outcome model is OLS)
 dr_ols <- tpate(outcome = "trans.tolerance.dv.t1",
              treatment = "treat_ind", 
              covariates = covariates, 
@@ -140,7 +141,7 @@ dr_ols <- tpate(outcome = "trans.tolerance.dv.t1",
              weights_max = 10) 
 unlist(dr_ols$tpate)
 
-## Doubley Robust Estimator (outcome model is BART)
+## Doubly Robust Estimator (outcome model is BART)
 dr_bart <- tpate(outcome = "trans.tolerance.dv.t1",
              treatment = "treat_ind", 
              covariates = covariates, 
@@ -153,42 +154,54 @@ unlist(dr_bart$tpate)
 ```
 
 ## Sign-Generalization via `pct()`
+The goal is to test the sign of the target population average treatment effect (T-PATE) using design of purposive variations within an experiment. Please read Section "Sign-Generalization" in Egami and Hartman (2022+) for details and practical recommendations for sign-generalization. We use Bisgaard (2019) as an example. See Section "Empirical Applications" in Egami and Hartman (2022+) as well.
 
-### When a substantive theory predicts a positive causal effect (i.e., null hypothesis: a causal effect is less than or equal to zero) 
+### Prepare data
+We need to compute the SATE for each purposive variation. To facilitate this process, we created a cleaned data set for each purposive variation (in total, 12 for opposition supporters and government supporters, respectively).
 ```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
-library(estimatr)
 data("Bisgaard")
 
-## Opposition Supporters (The Bisgaard theory predicts positive effects for this subgroup)
+## Opposition Supporters (The Bisgaard theory predicts the positive T-PATE for this subgroup)
 opp_data <- Bisgaard$opp_data  ## cleaned data for 12 different variations 
 
+head(opp_data[[1]][, c("outcome", "treatment")])
+
+## Government Supporters (The Bisgaard theory predicts the negative T-PATE for this subgroup)
+gov_data <- Bisgaard$gov_data  ## cleaned data for 12 different variations 
+
+head(gov_data[[1]][, c("outcome", "treatment")])
+```
+
+
+### Testing whether the T-PATE is positive
+First, we consider cases when a substantive theory predicts the T-PATE is positive. Therefore, a null hypothesis is that the T-PATE is less than or equal to zero. Therefore, when we compute one-sided p-values, we use `1 - prnom(z)` where `z` is the ratio of an estimated causal effect and its standard error. 
+```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(estimatr)
 ## Compute one-sided p-values for each variation
 pv_opp <- c()
 for(i in 1:12){
   data_variation <- opp_data[[i]]
-  fit_variation <- lm_robust(outcome ~ treatment, data = data_variation)  # compute the causal effect for each variation
+  fit_variation <- lm_robust(outcome ~ treatment, data = data_variation)  # compute the SATE for each variation
   z <- summary(fit_variation)$coef["treatment", "Estimate"]/summary(fit_variation)$coef["treatment", "Std. Error"]
   pv_opp[i] <- 1 - pnorm(z)  # one-sided p-value for positive effects
 }
 
 ## Partial Conjunction Test
-pct(pv_opp)
+round(pct(pv_opp), 2)
 ```
 
-### When a substantive theory predicts a negative causal effect (i.e., null hypothesis: a causal effect is larger than or equal to zero) 
+### Testing whether the T-PATE is negative
+Next, we consider cases when a substantive theory predicts the T-PATE is negative. Therefore, a null hypothesis is that the T-PATE is larger than or equal to zero. Therefore, when we compute one-sided p-values, we use `prnom(z)` where `z` is the ratio of an estimated causal effect and its standard error. 
 ```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
-## Government Supporters (The Bisgaard theory predicts negative effects for this subgroup)
-gov_data <- Bisgaard$gov_data  ## cleaned data for 12 different variations 
-
 ## Compute one-sided p-values for each variation
 pv_gov <- c()
 for(i in 1:12){
   data_variation <- gov_data[[i]]
-  fit_variation <- lm_robust(outcome ~ treatment, data = data_variation)  # compute the causal effect for each variation
+  fit_variation <- lm_robust(outcome ~ treatment, data = data_variation)  # compute the SATE for each variation
   z <- summary(fit_variation)$coef["treatment", "Estimate"]/summary(fit_variation)$coef["treatment", "Std. Error"]
   pv_gov[i] <- pnorm(z)  # one-sided p-value for negative effects
 }
 
 ## Partial Conjunction Test
-pct(pv_gov)
+round(pct(pv_gov), 2)
 ```
