@@ -1,4 +1,4 @@
-#' Generic Bootstrap function
+# Generic Bootstrap function
 gen_bootstrap <- function(est, numCores, sims = 1000,
                           formula_outcome,
                           formula_weights,

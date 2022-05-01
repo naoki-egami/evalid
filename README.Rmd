@@ -16,7 +16,7 @@ R package `evalid` provides two key functions. (1) `tpate()`: three classes of e
 - [Naoki Egami](https://naokiegami.com/)
 - [Erin Hartman](https://erinhartman.com/)
 
-**References:** 
+**Reference:** 
 
 - Egami and Hartman. (2022+). [Elements of External Validity: Framework, Design, and Analysis.](https://naokiegami.com/paper/external_full.pdf) Conditionally accepted at *American Political Science Review*
 

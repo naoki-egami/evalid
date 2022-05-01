@@ -14,7 +14,7 @@ methods are described in Egami and Hartman (2022+).
 -   [Naoki Egami](https://naokiegami.com/)
 -   [Erin Hartman](https://erinhartman.com/)
 
-**References:**
+**Reference:**
 
 -   Egami and Hartman. (2022+). [Elements of External Validity:
     Framework, Design, and
@@ -192,7 +192,7 @@ unlist(outcome_bart$tpate)
 ```
 
     ##            est             se  ci_lower.2.5% ci_upper.97.5% 
-    ##     0.12871238     0.08955265    -0.03317659     0.30846716
+    ##     0.13131353     0.08966712    -0.03655514     0.29892957
 
 ### Doubly Robust Estimators
 
@@ -238,7 +238,7 @@ unlist(dr_bart$tpate)
 ```
 
     ##            est             se  ci_lower.2.5% ci_upper.97.5% 
-    ##     0.34742023     0.17305695     0.01713379     0.67147978
+    ##     0.35799157     0.17846767     0.01611949     0.68309228
 
 Sign-Generalization via `pct()`
 -------------------------------
