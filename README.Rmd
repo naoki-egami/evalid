@@ -18,8 +18,8 @@ R package `evalid` provides two key functions. (1) `tpate()`: three classes of e
 
 **References:** 
 
- - Egami and Hartman. (2022+). [Elements of External Validity: Framework, Design, and Analysis.](https://naokiegami.com/paper/external_full.pdf) Conditionally accepted at *American Political Science Review*
- 
+- Egami and Hartman. (2022+). [Elements of External Validity: Framework, Design, and Analysis.](https://naokiegami.com/paper/external_full.pdf) Conditionally accepted at *American Political Science Review*
+
 ## Installation Instructions
 You can install the most recent development version using the `devtools` package. First you have to install `devtools` using the following code. Note that you only have to do this once:
 ```{r eval=FALSE} 
@@ -35,12 +35,12 @@ install_github("naoki-egami/evalid", dependencies = TRUE)
 Please read Section "The Proposed Approach toward External Validity: Outline" in Egami and Hartman (2022+) for the overview of effect- and sign-generalization.
 
 - **Effect-Generalization**
-    - Weighting-based Estimator: IPW estimator (`ipw`) or Weighted Least Squares (`wls`)
-    - Outcome-based Estimator: OLS-based estimator (`outcome-ols`) or BART-based estimator (`outcome-bart`)
-    - Doubly Robust Estimator: Doubly robust estimator with OLS-based outcome model (`dr-ols`) or Doubly robust estimator with BART-based outcome model (`dr-bart`)
+- Weighting-based Estimator: IPW estimator (`ipw`) or Weighted Least Squares (`wls`)
+- Outcome-based Estimator: OLS-based estimator (`outcome-ols`) or BART-based estimator (`outcome-bart`)
+- Doubly Robust Estimator: Doubly robust estimator with OLS-based outcome model (`dr-ols`) or Doubly robust estimator with BART-based outcome model (`dr-bart`)
 
 - **Sign-Generalization**
-    - How to use `pct()` function
+- How to use `pct()` function
 
 ## Effect-Generalization via `tpate()`
 The goal is to estimate the target population average treatment effect (T-PATE) in the target population data. Please read Section "Effect-Generalization" in Egami and Hartman (2022+) for details and practical recommendations for effect-generalization. We use Broockman and Kalla (2018) as an example. See Section "Empirical Applications" in Egami and Hartman (2022+) as well.
@@ -91,6 +91,7 @@ covariates_exp <- c("miami_trans_law_t0", "miami_trans_law2_t0",
                     "gender_norm_daugher_t0", "gender_norm_looks_t0",
                     "gender_norm_rights_t0", "therm_afams_t0", "vf_hispanic",
                     "survey_language_es","cluster_level_t0_scale_mean")
+
 wls <- tpate(outcome = "trans.tolerance.dv.t1",
              treatment = "treat_ind", 
              covariates = covariates, # covariates measured in both the experimental and population data
@@ -118,12 +119,12 @@ unlist(outcome_ols$tpate)
 
 ## BART Outcome-based Estimator 
 outcome_bart <- tpate(outcome = "trans.tolerance.dv.t1",
-                     treatment = "treat_ind", 
-                     covariates = covariates, # covariates measured in both the experimental and population data
-                     exp_data = exp_data, 
-                     pop_data = pop_data,
-                     id_cluster = exp_data$cluster, # cluster-standard errors 
-                     est_type = "outcome-bart") # type of estimator
+                      treatment = "treat_ind", 
+                      covariates = covariates, # covariates measured in both the experimental and population data
+                      exp_data = exp_data, 
+                      pop_data = pop_data,
+                      id_cluster = exp_data$cluster, # cluster-standard errors 
+                      est_type = "outcome-bart") # type of estimator
 unlist(outcome_bart$tpate)
 ```
 
@@ -132,24 +133,24 @@ Doubly robust estimators (`dr-ols` and `dr-bart`) estimate the T-PATE via modeli
 ```{r eval = TRUE, echo = TRUE, tidy=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 ## Doubly Robust Estimator (outcome model is OLS)
 dr_ols <- tpate(outcome = "trans.tolerance.dv.t1",
-             treatment = "treat_ind", 
-             covariates = covariates, 
-             exp_data = exp_data, 
-             pop_data = pop_data,
-             id_cluster = exp_data$cluster, # cluster-standard errors 
-             est_type = "dr-ols", # type of estimator 
-             weights_max = 10) 
+                treatment = "treat_ind", 
+                covariates = covariates, 
+                exp_data = exp_data, 
+                pop_data = pop_data,
+                id_cluster = exp_data$cluster, # cluster-standard errors 
+                est_type = "dr-ols", # type of estimator 
+                weights_max = 10) 
 unlist(dr_ols$tpate)
 
 ## Doubly Robust Estimator (outcome model is BART)
 dr_bart <- tpate(outcome = "trans.tolerance.dv.t1",
-             treatment = "treat_ind", 
-             covariates = covariates, 
-             exp_data = exp_data, 
-             pop_data = pop_data,
-             id_cluster = exp_data$cluster, # cluster-standard errors 
-             est_type = "dr-bart", # type of estimator 
-             weights_max = 10) 
+                 treatment = "treat_ind", 
+                 covariates = covariates, 
+                 exp_data = exp_data, 
+                 pop_data = pop_data,
+                 id_cluster = exp_data$cluster, # cluster-standard errors 
+                 est_type = "dr-bart", # type of estimator 
+                 weights_max = 10) 
 unlist(dr_bart$tpate)
 ```
 

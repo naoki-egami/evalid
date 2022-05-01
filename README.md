@@ -48,15 +48,20 @@ Outline” in Egami and Hartman (2022+) for the overview of effect- and
 sign-generalization.
 
 -   **Effect-Generalization**
-    -   Weighting-based Estimator: IPW estimator (`ipw`) or Weighted
-        Least Squares (`wls`)
-    -   Outcome-based Estimator: OLS-based estimator (`outcome-ols`) or
-        BART-based estimator (`outcome-bart`)
-    -   Doubly Robust Estimator: Doubly robust estimator with OLS-based
-        outcome model (`dr-ols`) or Doubly robust estimator with
-        BART-based outcome model (`dr-bart`)
+
+-   Weighting-based Estimator: IPW estimator (`ipw`) or Weighted Least
+    Squares (`wls`)
+
+-   Outcome-based Estimator: OLS-based estimator (`outcome-ols`) or
+    BART-based estimator (`outcome-bart`)
+
+-   Doubly Robust Estimator: Doubly robust estimator with OLS-based
+    outcome model (`dr-ols`) or Doubly robust estimator with BART-based
+    outcome model (`dr-bart`)
+
 -   **Sign-Generalization**
-    -   How to use `pct()` function
+
+-   How to use `pct()` function
 
 Effect-Generalization via `tpate()`
 -----------------------------------
@@ -131,6 +136,7 @@ covariates_exp <- c("miami_trans_law_t0", "miami_trans_law2_t0",
                     "gender_norm_daugher_t0", "gender_norm_looks_t0",
                     "gender_norm_rights_t0", "therm_afams_t0", "vf_hispanic",
                     "survey_language_es","cluster_level_t0_scale_mean")
+
 wls <- tpate(outcome = "trans.tolerance.dv.t1",
              treatment = "treat_ind", 
              covariates = covariates, # covariates measured in both the experimental and population data
@@ -171,12 +177,12 @@ unlist(outcome_ols$tpate)
 ``` r
 ## BART Outcome-based Estimator 
 outcome_bart <- tpate(outcome = "trans.tolerance.dv.t1",
-                     treatment = "treat_ind", 
-                     covariates = covariates, # covariates measured in both the experimental and population data
-                     exp_data = exp_data, 
-                     pop_data = pop_data,
-                     id_cluster = exp_data$cluster, # cluster-standard errors 
-                     est_type = "outcome-bart") # type of estimator
+                      treatment = "treat_ind", 
+                      covariates = covariates, # covariates measured in both the experimental and population data
+                      exp_data = exp_data, 
+                      pop_data = pop_data,
+                      id_cluster = exp_data$cluster, # cluster-standard errors 
+                      est_type = "outcome-bart") # type of estimator
 ```
 
     ## fitting response model via method 'bart'
@@ -186,7 +192,7 @@ unlist(outcome_bart$tpate)
 ```
 
     ##            est             se  ci_lower.2.5% ci_upper.97.5% 
-    ##     0.12912515     0.09186725    -0.04528969     0.32216350
+    ##     0.12871238     0.08955265    -0.03317659     0.30846716
 
 ### Doubly Robust Estimators
 
@@ -200,13 +206,13 @@ assumption for causal identification.
 ``` r
 ## Doubly Robust Estimator (outcome model is OLS)
 dr_ols <- tpate(outcome = "trans.tolerance.dv.t1",
-             treatment = "treat_ind", 
-             covariates = covariates, 
-             exp_data = exp_data, 
-             pop_data = pop_data,
-             id_cluster = exp_data$cluster, # cluster-standard errors 
-             est_type = "dr-ols", # type of estimator 
-             weights_max = 10) 
+                treatment = "treat_ind", 
+                covariates = covariates, 
+                exp_data = exp_data, 
+                pop_data = pop_data,
+                id_cluster = exp_data$cluster, # cluster-standard errors 
+                est_type = "dr-ols", # type of estimator 
+                weights_max = 10) 
 unlist(dr_ols$tpate)
 ```
 
@@ -216,13 +222,13 @@ unlist(dr_ols$tpate)
 ``` r
 ## Doubly Robust Estimator (outcome model is BART)
 dr_bart <- tpate(outcome = "trans.tolerance.dv.t1",
-             treatment = "treat_ind", 
-             covariates = covariates, 
-             exp_data = exp_data, 
-             pop_data = pop_data,
-             id_cluster = exp_data$cluster, # cluster-standard errors 
-             est_type = "dr-bart", # type of estimator 
-             weights_max = 10) 
+                 treatment = "treat_ind", 
+                 covariates = covariates, 
+                 exp_data = exp_data, 
+                 pop_data = pop_data,
+                 id_cluster = exp_data$cluster, # cluster-standard errors 
+                 est_type = "dr-bart", # type of estimator 
+                 weights_max = 10) 
 ```
 
     ## fitting response model via method 'bart'
@@ -232,7 +238,7 @@ unlist(dr_bart$tpate)
 ```
 
     ##            est             se  ci_lower.2.5% ci_upper.97.5% 
-    ##   0.3372459530   0.1787437217  -0.0004644112   0.6865294100
+    ##     0.34742023     0.17305695     0.01713379     0.67147978
 
 Sign-Generalization via `pct()`
 -------------------------------
