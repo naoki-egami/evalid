@@ -47,21 +47,14 @@ Please read Section “The Proposed Approach toward External Validity:
 Outline” in Egami and Hartman (2022+) for the overview of effect- and
 sign-generalization.
 
--   **Effect-Generalization**
+**Effect-Generalization** - Weighting-based Estimator: IPW estimator
+(`ipw`) or Weighted Least Squares (`wls`) - Outcome-based Estimator:
+OLS-based estimator (`outcome-ols`) or BART-based estimator
+(`outcome-bart`) - Doubly Robust Estimator: Doubly robust estimator with
+OLS-based outcome model (`dr-ols`) or Doubly robust estimator with
+BART-based outcome model (`dr-bart`)
 
--   Weighting-based Estimator: IPW estimator (`ipw`) or Weighted Least
-    Squares (`wls`)
-
--   Outcome-based Estimator: OLS-based estimator (`outcome-ols`) or
-    BART-based estimator (`outcome-bart`)
-
--   Doubly Robust Estimator: Doubly robust estimator with OLS-based
-    outcome model (`dr-ols`) or Doubly robust estimator with BART-based
-    outcome model (`dr-bart`)
-
--   **Sign-Generalization**
-
--   How to use `pct()` function
+**Sign-Generalization** - How to use `pct()` function
 
 Effect-Generalization via `tpate()`
 -----------------------------------
@@ -192,7 +185,7 @@ unlist(outcome_bart$tpate)
 ```
 
     ##            est             se  ci_lower.2.5% ci_upper.97.5% 
-    ##     0.13131353     0.08966712    -0.03655514     0.29892957
+    ##     0.12958598     0.08913481    -0.03087554     0.30615813
 
 ### Doubly Robust Estimators
 
@@ -238,7 +231,7 @@ unlist(dr_bart$tpate)
 ```
 
     ##            est             se  ci_lower.2.5% ci_upper.97.5% 
-    ##     0.35799157     0.17846767     0.01611949     0.68309228
+    ##     0.34082774     0.17697526    -0.01074015     0.67573733
 
 Sign-Generalization via `pct()`
 -------------------------------
