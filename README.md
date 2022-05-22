@@ -57,7 +57,8 @@ OLS-based estimator (`outcome-ols`) or BART-based estimator
 OLS-based outcome model (`dr-ols`) or Doubly robust estimator with
 BART-based outcome model (`dr-bart`)
 
-**Sign-Generalization** - How to use `pct()` function
+**Sign-Generalization** 
+- How to use `pct()` function
 
 Effect-Generalization via `tpate()`
 -----------------------------------
