@@ -47,10 +47,13 @@ Please read Section “The Proposed Approach toward External Validity:
 Outline” in Egami and Hartman (2022+) for the overview of effect- and
 sign-generalization.
 
-**Effect-Generalization** - Weighting-based Estimator: IPW estimator
-(`ipw`) or Weighted Least Squares (`wls`) - Outcome-based Estimator:
+**Effect-Generalization** 
+- Weighting-based Estimator: IPW estimator
+(`ipw`) or Weighted Least Squares (`wls`) 
+- Outcome-based Estimator:
 OLS-based estimator (`outcome-ols`) or BART-based estimator
-(`outcome-bart`) - Doubly Robust Estimator: Doubly robust estimator with
+(`outcome-bart`) 
+- Doubly Robust Estimator: Doubly robust estimator with
 OLS-based outcome model (`dr-ols`) or Doubly robust estimator with
 BART-based outcome model (`dr-bart`)
 
