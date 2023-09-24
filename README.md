@@ -1,5 +1,4 @@
-evalid: Methods for Improving External Validity of Randomized Experiments
-=========================================================================
+# evalid: Methods for Improving External Validity of Randomized Experiments
 
 **Description:**
 
@@ -16,13 +15,12 @@ methods are described in Egami and Hartman (2022+).
 
 **Reference:**
 
--   Egami and Hartman. (2022+). [Elements of External Validity:
+-   Egami and Hartman. (2023). [Elements of External Validity:
     Framework, Design, and
-    Analysis.](https://naokiegami.com/paper/external_full.pdf)
-    Conditionally accepted at *American Political Science Review*
+    Analysis.](https://naokiegami.com/paper/external_full.pdf) *American
+    Political Science Review*
 
-Installation Instructions
--------------------------
+## Installation Instructions
 
 You can install the most recent development version using the `devtools`
 package. First you have to install `devtools` using the following code.
@@ -40,28 +38,22 @@ library(devtools)
 install_github("naoki-egami/evalid", dependencies = TRUE)
 ```
 
-Overview
---------
+## Overview
 
 Please read Section “The Proposed Approach toward External Validity:
 Outline” in Egami and Hartman (2022+) for the overview of effect- and
 sign-generalization.
 
-**Effect-Generalization** 
-- Weighting-based Estimator: IPW estimator
-(`ipw`) or Weighted Least Squares (`wls`) 
-- Outcome-based Estimator:
+**Effect-Generalization** - Weighting-based Estimator: IPW estimator
+(`ipw`) or Weighted Least Squares (`wls`) - Outcome-based Estimator:
 OLS-based estimator (`outcome-ols`) or BART-based estimator
-(`outcome-bart`) 
-- Doubly Robust Estimator: Doubly robust estimator with
+(`outcome-bart`) - Doubly Robust Estimator: Doubly robust estimator with
 OLS-based outcome model (`dr-ols`) or Doubly robust estimator with
 BART-based outcome model (`dr-bart`)
 
-**Sign-Generalization** 
-- How to use `pct()` function
+**Sign-Generalization** - How to use `pct()` function
 
-Effect-Generalization via `tpate()`
------------------------------------
+## Effect-Generalization via `tpate()`
 
 The goal is to estimate the target population average treatment effect
 (T-PATE) in the target population data. Please read Section
@@ -189,7 +181,7 @@ unlist(outcome_bart$tpate)
 ```
 
     ##            est             se  ci_lower.2.5% ci_upper.97.5% 
-    ##     0.12958598     0.08913481    -0.03087554     0.30615813
+    ##     0.11611386     0.08863932    -0.05582415     0.28500115
 
 ### Doubly Robust Estimators
 
@@ -235,10 +227,9 @@ unlist(dr_bart$tpate)
 ```
 
     ##            est             se  ci_lower.2.5% ci_upper.97.5% 
-    ##     0.34082774     0.17697526    -0.01074015     0.67573733
+    ##    0.351732881    0.175716243   -0.007113619    0.680423630
 
-Sign-Generalization via `pct()`
--------------------------------
+## Sign-Generalization via `pct()`
 
 The goal is to test the sign of the target population average treatment
 effect (T-PATE) using design of purposive variations within an

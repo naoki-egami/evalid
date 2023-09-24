@@ -24,6 +24,7 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach "%dopar%" "%do%" foreach
 #' @importFrom MASS mvrnorm
+#' @importFrom stats as.formula binomial coef confint formula glm lm model.frame model.matrix na.omit predict quantile sd terms update vcov weighted.mean weights
 #' @return \code{tpate} returns the following values.
 #'  \itemize{
 #'    \item \code{sate}: Estimates of the SATE
@@ -61,6 +62,12 @@ tpate <- function(outcome,
   }else{
     class(pop_data) <- "data.frame"
   }
+
+  ## clean NAs
+  exp_data_na <- apply(exp_data[, c(outcome, treatment, covariates)], 1, FUN = function(x) any(is.na(x)))
+  pop_data_na <- apply(pop_data[, c(covariates)], 1, FUN = function(x) any(is.na(x)))
+  exp_data <- exp_data[exp_data_na == FALSE, ]
+  pop_data <- pop_data[pop_data_na == FALSE, ]
 
   ## est_type
   if((est_type %in% c("ipw","wls", "outcome-ols", "outcome-bart", "dr-ols", "dr-bart")) == FALSE){

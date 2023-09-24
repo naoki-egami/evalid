@@ -18,7 +18,7 @@ R package `evalid` provides two key functions. (1) `tpate()`: three classes of e
 
 **Reference:** 
 
-- Egami and Hartman. (2022+). [Elements of External Validity: Framework, Design, and Analysis.](https://naokiegami.com/paper/external_full.pdf) Conditionally accepted at *American Political Science Review*
+- Egami and Hartman. (2023). [Elements of External Validity: Framework, Design, and Analysis.](https://naokiegami.com/paper/external_full.pdf) *American Political Science Review*
 
 ## Installation Instructions
 You can install the most recent development version using the `devtools` package. First you have to install `devtools` using the following code. Note that you only have to do this once:
